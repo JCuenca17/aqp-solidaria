@@ -120,7 +120,7 @@ Tercer documento del ciclo de desarrollo dirigido por especificación (SDD): `re
 ## Fase 7 — Verificación (13/11)
 
 - [ ] **11. Pruebas de aceptación con evidencia**
-  - [ ] 11.1 `security-tests.mjs`: T01–T09, T11, T12.
+  - [x] 11.1 `security-tests.mjs`: T01–T09, T11, T12 (11/11). 10/11 a la primera; T11 dio 403 para el ID token (insufficient_scope). Se acepta 401/403 solo para el ID token y se documenta en el informe §4.4.
   - [ ] 11.2 `t10-iam-check.sh`: T10.
   - [ ] 11.3 `t13-revocation.mjs`: T13 (≈15 min).
   - [ ] 11.4 `t14-mfa-check.sh` y captura del login con TOTP: T14 / CA-11.2.

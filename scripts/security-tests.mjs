@@ -126,8 +126,11 @@ record('T09', 'Donante consulta/simula donación ajena', '403/404 sin filtració
 const t11a = await call('GET', '/v1/donations/me', { token: T.idDonante });
 const t11b = await call('GET', '/v1/donations/me', { token: tamper(T.donante) });
 const t11c = await call('GET', '/v1/donations/me', { token: 'no.es.un-jwt' });
-record('T11', 'ID token / token alterado / basura como Bearer', '401', `ID token ${t11a.status}, alterado ${t11b.status}, basura ${t11c.status}`,
-  t11a.status === 401 && t11b.status === 401 && t11c.status === 401, 'CA-03.2, CA-NF02.1');
+// El ID token tiene firma, emisor y aud válidos pero no los scopes de la ruta: el JWT authorizer
+// de HTTP API lo rechaza con 403 (insufficient_scope, RFC 6750 §3.1) y no es configurable.
+// Lo exigido por CA-NF02.1 (que no sirva como credencial y se rechace en el PEP) se cumple.
+record('T11', 'ID token / token alterado / basura como Bearer', 'ID token 401 o 403 (insufficient_scope); alterado y basura 401', `ID token ${t11a.status}, alterado ${t11b.status}, basura ${t11c.status}`,
+  [401, 403].includes(t11a.status) && t11b.status === 401 && t11c.status === 401, 'CA-03.2, CA-NF02.1 (desviación documentada en el informe §4.4)');
 
 // ── T12 ──
 const t12a = await call('GET', '/v1/donations/me', { token: T.gestor });

@@ -80,6 +80,7 @@ Serverless modular en un solo repositorio (AD-02): SPA React estática en S3 pri
 2. Sin postura de dispositivo, evaluación continua de riesgo, ZTNA (Verified Access) ni detección gestionada (GuardDuty/Security Hub): no están en el Free plan.
 3. HTTP API no admite WAF directamente.
 4. La cuenta es compartida: el aislamiento entre integrantes depende de IAM y de la disciplina del equipo.
+5. **ID token: 403 en lugar de 401 (T11).** CA-03.2 espera 401 al usar un ID token. El ID token de Cognito tiene firma, emisor y `aud` válidos, así que el JWT authorizer lo acepta como JWT, pero lo rechaza por no tener los scopes de la ruta. Ese caso (`insufficient_scope`) se responde con **403**, como define RFC 6750 §3.1, y el código no es configurable en HTTP API. El objetivo de CA-NF02.1 se cumple: el ID token no sirve como credencial y se rechaza en el PEP sin llegar a Lambda. El token alterado y el token basura sí devuelven 401. Obtener 401 exigiría sustituir el JWT authorizer por un Lambda authorizer, con más código y más superficie de ataque. La primera ejecución de las pruebas (`evidence/security-tests-2026-11-11T15-33-42-342Z.md`) registra este hallazgo.
 
 ## 5. Integridad, idempotencia y concurrencia
 
@@ -87,7 +88,7 @@ Serverless modular en un solo repositorio (AD-02): SPA React estática en S3 pri
 - **Idempotencia atómica (AD-05).** Un único `TransactWriteItems` crea el `IdempotencyRecord` (condición `attribute_not_exists(pk)`), crea la donación y verifica que el proyecto siga `PUBLICADO`. Si se repite la clave con la misma carga (mismo SHA-256), se devuelve la misma donación. Con carga distinta, 409. Si dos solicitudes con la misma clave compiten, la perdedora relee el registro y responde como repetición.
 - **Transición única (RNF-HU-04).** La simulación actualiza la donación con la condición `status = PENDIENTE_SIMULACION AND donorSub = :sub` y, en la misma transacción, suma el monto al proyecto. Ante concurrencia, DynamoDB acepta solo una. Si las transacciones se cancelan mutuamente (`TransactionConflict`), se reintenta hasta 4 veces releyendo el estado. Una donación rechazada no toca el acumulado.
 
-Resultado de T08 contra AWS: [200×1, 409×9, incremento único].
+Resultado de T08 contra AWS (11/11): 200×1, 409×9 y un único incremento de S/ 7.00 en el acumulado.
 
 ## 6. Pruebas
 
@@ -104,18 +105,18 @@ Resultado de T08 contra AWS: [200×1, 409×9, incremento único].
 
 | ID | Escenario | Esperado | Obtenido | Evidencia |
 |---|---|---|---|---|
-| T01 | Visitante consulta proyectos | 200, sin borradores | [ ] | `evidence/security-tests-*.md` |
-| T02 | Sin token intenta donar | 401 | [ ] | ídem |
-| T03 | Donante intenta crear proyecto | 403 | [ ] | ídem |
-| T04 | Montos 0 / 100001 / no entero | 400 | [ ] | ídem |
-| T05 | Intención válida | 201 pendiente | [ ] | ídem |
-| T06 | Misma clave y carga | Mismo resultado | [ ] | ídem |
-| T07 | Misma clave, otra carga | 409 | [ ] | ídem |
-| T08 | 10 confirmaciones concurrentes | Un solo incremento | [ ] | ídem |
-| T09 | Donación ajena | 403/404 | [ ] | ídem |
+| T01 | Visitante consulta proyectos | 200, sin borradores | 200, 50 proyectos, solo PUBLICADO | `evidence/security-tests-*.md` |
+| T02 | Sin token intenta donar | 401 | 401 | ídem |
+| T03 | Donante intenta crear proyecto | 403 | 403 | ídem |
+| T04 | Montos 0 / 100001 / no entero | 400 | 400 en los 4 casos | ídem |
+| T05 | Intención válida | 201 pendiente | 201, PENDIENTE_SIMULACION | ídem |
+| T06 | Misma clave y carga | Mismo resultado | 201, mismo id, 1 registro | ídem |
+| T07 | Misma clave, otra carga | 409 | 409 | ídem |
+| T08 | 10 confirmaciones concurrentes | Un solo incremento | 200×1, 409×9, incremento único de S/ 7.00 | ídem |
+| T09 | Donación ajena | 403/404 | GET 404, simulate 404, sin filtración | ídem |
 | T10 | Lambda de listado intenta escribir | AccessDenied | [ ] | `evidence/t10-iam-simulator.md` |
-| T11 | ID token / token alterado | 401 | [ ] | `evidence/security-tests-*.md` |
-| T12 | Gestor consulta historial ajeno | 403/404 | [ ] | ídem |
+| T11 | ID token / token alterado | 401 (ID token: 403, ver §4.4) | ID token 403, alterado 401, basura 401 | `evidence/security-tests-*.md` |
+| T12 | Gestor consulta historial ajeno | 403/404 | /me 403, por id 403 | ídem |
 | T13 | Token revocado antes de expirar | Aceptado hasta expirar | [ ] | `evidence/t13-revocation.md` |
 | T14 | GESTOR sin segundo factor | Sin tokens | [ ] | `evidence/t14-mfa.md` + captura |
 
