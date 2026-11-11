@@ -9,39 +9,38 @@ Esta guía cubre lo que el equipo hace a mano en la consola de AWS. Todo lo dem�
 3. Elegir **Free plan**, no Paid plan. El Free plan no cobra: el consumo sale de los créditos (hasta 200 USD por 6 meses) y la cuenta se cierra antes de cobrar.
 4. Completar teléfono y, si lo pide, tarjeta (solo verificación). Plan de soporte: **Básico (gratuito)**.
 
-## Paso 2. Proteger el usuario root (y dejar de usarlo)
+> **Importante:** la cuenta se creó con la **nueva experiencia de AWS** (consola con "Proyectos", "Equipo" y AWS Builder ID). En esta modalidad **no existe usuario root**, la región la asigna AWS según el país (Perú → **us-east-2, Ohio**) y los usuarios IAM solo pueden tener acceso programático. Por eso los pasos 2 a 5 difieren de la guía clásica. **No** se activan las "características avanzadas", para mantener el Free plan. Fuente: [Compare sign-up options](https://docs.aws.amazon.com/accounts/latest/reference/sign-up-for-aws.html).
 
-1. Iniciar sesión como root → menú de la cuenta (arriba a la derecha) → **Credenciales de seguridad**.
-2. **Asignar dispositivo MFA** → *Aplicación de autenticación* → escanear el QR con Google Authenticator o Microsoft Authenticator → ingresar dos códigos seguidos.
-3. No crear llaves de acceso para root. A partir del paso 3, root no se vuelve a usar (CA-NF03.3).
+## Paso 2. MFA en el AWS Builder ID del dueño
 
-## Paso 3. Región única
+1. Ir a https://settings.aws.com → menú **Manage security and sign-in** (Administrar seguridad e inicio de sesión). Redirige al perfil del AWS Builder ID.
+   - Si la cuenta se creó con **Continuar con Google**, el MFA se activa en la cuenta de Google (verificación en dos pasos).
+2. En **Security**, elegir **Register device** → **Authenticator app**.
+3. Escanear el QR con Google Authenticator o Microsoft Authenticator y escribir el código → **Assign MFA**.
+4. Registrar un segundo dispositivo de respaldo (recomendado por AWS: si se pierden todos, la cuenta no se recupera).
 
-Arriba a la derecha, seleccionar **EE. UU. Este (Norte de Virginia) us-east-1**. Todo el proyecto vive en esa región.
+## Paso 3. Región
+
+No se elige: la del proyecto es **us-east-2 (Ohio)**. Se confirma en settings.aws.com → **Project** → *Additional info* → **Region**. La plantilla SAM y los scripts ya usan us-east-2.
 
 ## Paso 4. Alerta de presupuesto (CA-NF09.1)
 
-1. Buscar **Budgets** → **Crear presupuesto** → plantilla **Presupuesto de gasto cero** (alerta en cuanto haya cualquier gasto).
+1. Buscar **Budgets** en la consola → **Crear presupuesto** → plantilla **Presupuesto de gasto cero**.
 2. Poner los correos del equipo → **Crear**.
-3. Tomar captura para `evidence/` (evidencia de RNF-HU-09).
+3. Tomar captura para `evidence/`.
 
-## Paso 5. Un usuario IAM por integrante, con MFA y sin llaves
+## Paso 5. Integrantes del equipo (CA-NF03.3)
 
-1. Buscar **IAM** → **Grupos de usuarios** → crear dos grupos:
-   - `Despliegue`: política `AdministratorAccess`. Solo para 1–2 personas (líder técnico e identidad). Se justifica porque `sam deploy` crea roles IAM y el Free plan no tiene IAM Identity Center.
-   - `Equipo`: políticas `ReadOnlyAccess` y `AWSCloudShellFullAccess`, para revisar logs, CloudWatch y evidencias.
-2. **Usuarios** → **Crear usuario** (uno por integrante):
-   - Marcar **Proporcionar acceso a la consola** y la opción de cambiar la contraseña en el primer inicio.
-   - Asignarlo a su grupo.
-   - **No crear llaves de acceso** (access keys).
-3. Cada integrante entra con la URL de inicio de sesión de la cuenta (aparece en el panel de IAM), cambia su contraseña y en **Credenciales de seguridad** asigna su **MFA**.
-4. Captura de la lista de usuarios con la columna MFA → `evidence/`.
+1. En el menú de la cuenta (arriba a la derecha) → **Equipo** → invitar a cada integrante con su correo.
+2. Cada integrante acepta la invitación con **su propio AWS Builder ID** y le activa MFA (Paso 2).
+3. No se crean usuarios IAM de consola ni llaves de acceso.
+4. Captura de la lista del equipo → `evidence/`.
 
 ## Paso 6. Desplegar desde AWS CloudShell (sin instalar nada)
 
-Lo ejecuta un integrante del grupo `Despliegue`, con su usuario IAM y en us-east-1:
+Lo ejecuta el dueño o un integrante del equipo, en la región del proyecto (us-east-2):
 
-1. Abrir **CloudShell** (ícono `>_` en la barra superior). Usa credenciales temporales: no hay llaves que guardar.
+1. Abrir **CloudShell** (ícono `>_` en la barra superior o abajo a la izquierda). Usa credenciales temporales: no hay llaves que guardar. Verificar con `echo $AWS_REGION` que diga `us-east-2`.
 2. Verificar las herramientas:
    ```bash
    node -v      # se necesita 20.19 o superior

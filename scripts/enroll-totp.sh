@@ -9,7 +9,7 @@ EMAIL="${1:?Uso: enroll-totp.sh <email> <GESTOR|AUDITOR>}"
 GROUP="${2:?Uso: enroll-totp.sh <email> <GESTOR|AUDITOR>}"
 [[ "$GROUP" == "GESTOR" || "$GROUP" == "AUDITOR" ]] || { echo "Grupo inválido"; exit 1; }
 STACK="${STACK:-aqp-solidaria-academic}"
-REGION="${REGION:-us-east-1}"
+REGION="${REGION:-${AWS_REGION:-us-east-2}}"
 
 out() {
   aws cloudformation describe-stacks --stack-name "$STACK" --region "$REGION" \

@@ -3,7 +3,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 STACK="${STACK:-aqp-solidaria-academic}"
-REGION="${REGION:-us-east-1}"
+REGION="${REGION:-${AWS_REGION:-us-east-2}}"
 
 out() {
   aws cloudformation describe-stacks --stack-name "$STACK" --region "$REGION" \

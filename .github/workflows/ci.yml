@@ -60,9 +60,9 @@ jobs:
       - run: npm run build
         working-directory: frontend
         env:
-          VITE_API_URL: https://example.execute-api.us-east-1.amazonaws.com/academic
-          VITE_COGNITO_AUTHORITY: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_EXAMPLE
-          VITE_COGNITO_DOMAIN: https://example.auth.us-east-1.amazoncognito.com
+          VITE_API_URL: https://example.execute-api.us-east-2.amazonaws.com/academic
+          VITE_COGNITO_AUTHORITY: https://cognito-idp.us-east-2.amazonaws.com/us-east-2_EXAMPLE
+          VITE_COGNITO_DOMAIN: https://example.auth.us-east-2.amazoncognito.com
           VITE_CLIENT_ID: example
       - name: npm audit (dependencias de producción)
         run: npm audit --omit=dev --audit-level=high

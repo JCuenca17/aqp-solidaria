@@ -121,7 +121,7 @@ Resultado de T08 contra AWS: [200×1, 409×9, incremento único].
 
 ### 6.3 Rendimiento (RNF-HU-05)
 
-Método: 50 proyectos publicados con `seed-projects.mjs`; `perf-test.mjs` desde CloudShell us-east-1 (cliente cercano), 5 solicitudes de calentamiento descartadas y 200 medidas con concurrencia 5. Resultado: p95 = [ ] ms (criterio ≤ 1500 ms).
+Método: 50 proyectos publicados con `seed-projects.mjs`; `perf-test.mjs` desde CloudShell us-east-2 (misma región que el API), 5 solicitudes de calentamiento descartadas y 200 medidas con concurrencia 5. Resultado: p95 = [ ] ms (criterio ≤ 1500 ms).
 
 ## 7. Experiencia de usuario y accesibilidad (RNF-HU-06)
 
@@ -144,7 +144,7 @@ Cada Lambda escribe una línea JSON por solicitud (`requestId`, acción, resulta
 
 ## 9. Costos, cuenta y limpieza (RNF-HU-09)
 
-Cuenta AWS Free plan en `us-east-1`, alerta de Budgets de gasto cero, root con MFA y sin uso diario, y un usuario IAM con MFA por integrante, sin llaves de larga duración (despliegue desde CloudShell). Tras la evaluación se ejecuta `scripts/cleanup.sh` y se verifica en Resource Explorer que no queden recursos.
+Cuenta AWS Free plan creada con la nueva experiencia de AWS (proyectos y AWS Builder ID). Dos diferencias respecto al design.md, ambas impuestas por esa modalidad y no elegidas por el equipo: (1) la región la asigna AWS según el país (Perú → **us-east-2, Ohio**), en lugar de la us-east-1 recomendada; (2) no existe usuario root ni usuarios IAM de consola: la cuenta pertenece al Builder ID del dueño (con MFA) y cada integrante entra como miembro del equipo con su propio Builder ID y MFA. Esto cumple el objetivo de CA-NF03.3 (identidad individual con MFA, sin root ni llaves de larga duración) por otro mecanismo. Alerta de Budgets de gasto cero y despliegue desde CloudShell con credenciales temporales. Tras la evaluación se ejecuta `scripts/cleanup.sh` y se verifica en Resource Explorer que no queden recursos.
 
 ## 10. Uso de IA
 

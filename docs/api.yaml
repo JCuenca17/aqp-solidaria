@@ -8,7 +8,7 @@ info:
     scope indicado; un ID token es rechazado con 401 por el JWT authorizer. Además del scope, el
     backend verifica el grupo (`cognito:groups`) y la propiedad del recurso en cada solicitud.
 servers:
-  - url: https://{apiId}.execute-api.us-east-1.amazonaws.com/academic
+  - url: https://{apiId}.execute-api.us-east-2.amazonaws.com/academic
     variables:
       apiId: { default: xxxxxxxxxx }
 
@@ -23,8 +23,8 @@ components:
       type: oauth2
       flows:
         authorizationCode:
-          authorizationUrl: https://aqp-solidaria-ACCOUNT.auth.us-east-1.amazoncognito.com/oauth2/authorize
-          tokenUrl: https://aqp-solidaria-ACCOUNT.auth.us-east-1.amazoncognito.com/oauth2/token
+          authorizationUrl: https://aqp-solidaria-ACCOUNT.auth.us-east-2.amazoncognito.com/oauth2/authorize
+          tokenUrl: https://aqp-solidaria-ACCOUNT.auth.us-east-2.amazoncognito.com/oauth2/token
           scopes:
             api/projects.write: Crear y publicar proyectos (grupo GESTOR)
             api/donations.write: Registrar y simular donaciones (grupo DONANTE)

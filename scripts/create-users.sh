@@ -6,7 +6,7 @@
 # La contraseña se pide por teclado y no se guarda en ningún archivo.
 set -euo pipefail
 STACK="${STACK:-aqp-solidaria-academic}"
-REGION="${REGION:-us-east-1}"
+REGION="${REGION:-${AWS_REGION:-us-east-2}}"
 DOMAIN="${TEST_EMAIL_DOMAIN:-example.com}"
 
 POOL_ID="$(aws cloudformation describe-stacks --stack-name "$STACK" --region "$REGION" \

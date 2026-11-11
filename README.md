@@ -60,7 +60,7 @@ cd ../frontend && npm ci && npm test && npm run dev    # requiere frontend/.env.
 
 El frontend en `localhost:5173` usa el API y Cognito desplegados. La plantilla permite `http://localhost:5173` como callback solo mientras `AllowLocalhost=true`; para la evaluación final puede desplegarse con `false`.
 
-## Despliegue (AWS CloudShell, us-east-1)
+## Despliegue (AWS CloudShell, us-east-2)
 
 ```bash
 git clone https://github.com/JCuenca17/aqp-solidaria.git && cd aqp-solidaria
@@ -74,8 +74,9 @@ bash scripts/enroll-totp.sh auditor@example.com AUDITOR
 
 ### Restricciones de la cuenta (AWS Free plan)
 
-- Una sola región (`us-east-1`), alerta de **Budgets** de gasto cero y root con MFA sin uso diario.
-- Un usuario IAM con MFA por integrante, **sin llaves de acceso de larga duración**. Se despliega con las credenciales temporales de CloudShell.
+- La cuenta se creó con la **nueva experiencia de AWS** (proyectos + AWS Builder ID). AWS asigna la región según el país de contacto: para Perú es **us-east-2 (Ohio)** y no se puede cambiar sin activar las características avanzadas. Por eso se usa us-east-2 y no la us-east-1 que *recomienda* el design.md (AD-06).
+- No existe usuario root: la cuenta pertenece al AWS Builder ID del dueño, protegido con MFA. Los integrantes entran como **miembros del equipo** del proyecto, cada uno con su propio Builder ID y MFA. En esta modalidad los usuarios IAM solo pueden tener acceso programático, así que no se crean usuarios IAM de consola ni llaves de larga duración.
+- Alerta de **Budgets** de gasto cero; despliegue con las credenciales temporales de CloudShell.
 - No se usan Cognito Plus, SMS, WAF, GuardDuty, Security Hub ni Verified Access (fuera del Free plan o con costo).
 
 ## Pruebas
@@ -93,7 +94,7 @@ bash scripts/enroll-totp.sh auditor@example.com AUDITOR
 Las pruebas contra AWS necesitan access tokens. Se obtienen así: iniciar sesión en la demo, abrir DevTools → **Red**, tomar una llamada al API y copiar el valor de `Authorization` sin `Bearer `. El ID token del donante (para T11) aparece en la respuesta de `/oauth2/token`. Los scripts **nunca** imprimen ni guardan tokens.
 
 ```bash
-export API_URL=https://xxxx.execute-api.us-east-1.amazonaws.com/academic
+export API_URL=https://xxxx.execute-api.us-east-2.amazonaws.com/academic
 export TOKEN_DONANTE=... TOKEN_DONANTE2=... TOKEN_GESTOR=... ID_TOKEN_DONANTE=...
 node scripts/security-tests.mjs        # genera evidence/security-tests-<fecha>.md
 bash scripts/t10-iam-check.sh

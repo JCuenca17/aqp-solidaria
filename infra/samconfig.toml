@@ -2,7 +2,7 @@
 version = 0.1
 
 [default.global.parameters]
-region = "us-east-1"
+region = "us-east-2"
 
 [default.deploy.parameters]
 stack_name = "aqp-solidaria-academic"
@@ -16,4 +16,4 @@ tags = "Project=aqp-solidaria Course=TAIS"
 
 [default.delete.parameters]
 stack_name = "aqp-solidaria-academic"
-region = "us-east-1"
+region = "us-east-2"

@@ -3,7 +3,7 @@
  * RNF-HU-05: p95 de GET del backend con 50 proyectos, excluyendo cold start.
  * Método: 5 solicitudes de calentamiento descartadas + N solicitudes medidas
  * (concurrencia 5) a GET /v1/projects y GET /v1/projects/{id}.
- * Uso: API_URL=... N=200 node scripts/perf-test.mjs  (ejecutar desde CloudShell us-east-1 = cliente cercano)
+ * Uso: API_URL=... N=200 node scripts/perf-test.mjs  (ejecutar desde CloudShell en la región del API = cliente cercano)
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -63,7 +63,7 @@ writeFileSync(
     '# RNF-HU-05 — Rendimiento de GET del backend',
     '',
     `- **Herramienta:** script Node.js \`scripts/perf-test.mjs\` (fetch nativo, Node ${process.version}).`,
-    `- **Cliente:** ${os.hostname().includes('cloudshell') || process.env.AWS_EXECUTION_ENV ? 'AWS CloudShell us-east-1 (misma región que el API)' : os.hostname()}.`,
+    `- **Cliente:** ${os.hostname().includes('cloudshell') || process.env.AWS_EXECUTION_ENV ? `AWS CloudShell ${process.env.AWS_REGION ?? ''} (misma región que el API)` : os.hostname()}.`,
     `- **Condiciones:** ${ids.length} proyectos publicados; 5 solicitudes de calentamiento descartadas (cold start excluido); ${N} solicitudes medidas con concurrencia ${CONC}, mitad a \`/v1/projects\` y mitad a \`/v1/projects/{id}\`.`,
     '',
     '| Métrica | Valor (ms) |',

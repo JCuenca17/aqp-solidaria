@@ -5,7 +5,7 @@
 set -euo pipefail
 EMAIL="${1:-gestor@example.com}"
 STACK="${STACK:-aqp-solidaria-academic}"
-REGION="${REGION:-us-east-1}"
+REGION="${REGION:-${AWS_REGION:-us-east-2}}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 out() {

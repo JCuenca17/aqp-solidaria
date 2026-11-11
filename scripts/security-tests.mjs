@@ -4,7 +4,7 @@
  * T10 (IAM), T13 (revocación) y T14 (MFA) tienen sus propios scripts/procedimientos (ver README).
  *
  * Uso (Node 20+, sin dependencias):
- *   API_URL=https://xxx.execute-api.us-east-1.amazonaws.com/academic \
+ *   API_URL=https://xxx.execute-api.us-east-2.amazonaws.com/academic \
  *   TOKEN_DONANTE=... TOKEN_DONANTE2=... TOKEN_GESTOR=... ID_TOKEN_DONANTE=... \
  *   node scripts/security-tests.mjs
  *

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Despliegue completo desde AWS CloudShell (us-east-1). Uso: bash scripts/deploy.sh
-# Requiere: credenciales temporales de CloudShell (usuario IAM con MFA). Nunca llaves de larga duración.
+# Despliegue completo desde AWS CloudShell (región del proyecto: us-east-2, Ohio). Uso: bash scripts/deploy.sh
+# Requiere: credenciales temporales de CloudShell (Builder ID con MFA). Nunca llaves de larga duración.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 STACK="aqp-solidaria-academic"
-REGION="us-east-1"
+REGION="${REGION:-${AWS_REGION:-us-east-2}}"
 
 echo "▶ 1/4 Compilando backend"
 (cd "$ROOT/backend" && npm ci --no-audit --no-fund && npm run build)

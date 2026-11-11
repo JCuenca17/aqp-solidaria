@@ -3,7 +3,7 @@
 # Se usa IAM Policy Simulator sobre su rol real: debe responder implicitDeny para escrituras.
 set -euo pipefail
 STACK="${STACK:-aqp-solidaria-academic}"
-REGION="${REGION:-us-east-1}"
+REGION="${REGION:-${AWS_REGION:-us-east-2}}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 out() {
