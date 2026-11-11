@@ -1,9 +1,9 @@
 # Informe técnico: Plataforma de Donaciones Seguras AQP-SOLIDARIA
 
 **Curso:** Tópicos Avanzados en Ingeniería de Software, EPIS, UNSA
-**Equipo:** [nombres de los integrantes]
+**Equipo:** Chancuaña Alvis Klismann · Cuenca Gutierrez Jose Luis · Hidalgo Chinchay Paulo Andre · Mamani Solórzano Efraín Alex · Soto Ccoya Gabriel Eduardo
 **Periodo de trabajo:** 10/11/2026 – 13/11/2026
-**Repositorio:** https://github.com/JCuenca17/aqp-solidaria · **Demo:** [WebUrl de CloudFront]
+**Repositorio:** https://github.com/JCuenca17/aqp-solidaria · **Demo:** https://d1mkuf1y3fbox2.cloudfront.net
 
 > Los campos entre corchetes se completan con los resultados del despliegue y de las pruebas (`evidence/`).
 
@@ -21,10 +21,19 @@ Se trabajó con **desarrollo dirigido por especificación** (SDD): `requirements
 |---|---|---|
 | 10/11 | Análisis de la especificación, roles, threat model | Plan y modelo de amenazas |
 | 11/11 | Repositorio, backend, plantilla SAM, SPA, pruebas unitarias, CI | 77 pruebas en verde, `cfn-lint` sin errores |
-| 12/11 | Cuenta Free plan, usuarios IAM con MFA, despliegue, usuarios de prueba y TOTP | [WebUrl activa, capturas] |
-| 13/11 | Pruebas T01–T14, rendimiento, evidencias, informe, demo | [`evidence/`] |
+| 11/11 | Cuenta Free plan (nueva experiencia de AWS), MFA, presupuesto, equipo, despliegue, usuarios de prueba y TOTP | WebUrl activa, capturas en `evidence/capturas/` |
+| 11/11 | Pruebas T01–T14, rendimiento y evidencias | `evidence/` |
+| 12–13/11 | Revisión por PR, capturas pendientes, ensayo de la demo y entrega | Informe final |
 
-**Roles del equipo:** [líder técnico y DevOps], [identidad y seguridad], [backend], [frontend], [QA y documentación].
+**Roles del equipo** (design.md §9):
+
+| Integrante | Rol | Responsabilidad principal |
+|---|---|---|
+| Cuenca Gutierrez Jose Luis | Líder técnico y DevOps | Cuenta AWS Free plan, plantilla SAM, CI, despliegue desde CloudShell |
+| Chancuaña Alvis Klismann | Identidad y seguridad | Cognito (PKCE, grupos, MFA TOTP), módulo `authz`, threat model y mapeo NIST |
+| Hidalgo Chinchay Paulo Andre | Backend | Donaciones, idempotencia y transacciones en DynamoDB |
+| Mamani Solórzano Efraín Alex | Frontend | SPA React, login OIDC, accesibilidad |
+| Soto Ccoya Gabriel Eduardo | QA y documentación | Pruebas T01–T14, evidencias e informe |
 
 ## 3. Arquitectura
 
