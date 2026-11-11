@@ -5,8 +5,6 @@
 
 Tercer documento del ciclo de desarrollo dirigido por especificación (SDD): `requirements.md` dice **qué**, `design.md` dice **cómo** y este archivo dice **en qué orden** y **cómo se verifica** cada paso. Cada tarea indica los requisitos que cubre (HU/CA/RNF-HU) y la prueba que la valida (unitaria o T01–T14).
 
-> Nota de proceso: este plan se formalizó por escrito el 11/11/2026, cuando el código del MVP ya estaba en marcha. Las tareas 1–7 se registran como completadas con su evidencia y las 8–13 se ejecutan siguiendo este archivo.
-
 **Leyenda:** `[x]` completada y verificada · `[ ]` pendiente · `[~]` en curso
 
 ---
