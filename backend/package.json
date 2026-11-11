@@ -12,8 +12,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "build": "node scripts/build.mjs",
-    "format": "prettier --write .",
-    "seed": "node scripts/seed-projects.mjs"
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "3.1166.0",
