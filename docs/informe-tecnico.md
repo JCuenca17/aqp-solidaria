@@ -173,7 +173,13 @@ Diseño responsive con Tailwind (sin Bootstrap), probado a 375 px. Criterios WCA
 - 3.3.1 y 4.1.3: errores con `role="alert"` y estados con `role="status"`.
 - 1.4.3: contraste de texto principal sobre fondo claro.
 
-> Pendiente: capturas a 375 px de catálogo, detalle con formulario de donación e historial.
+Vistas capturadas en Chrome DevTools con el perfil iPhone SE (375 × 667 px, densidad 2x):
+
+![Figura: Catálogo a 375 px](../evidence/capturas/19-movil-375-catalogo.png)
+
+![Figura: Formulario de donación a 375 px: solo pide el monto y muestra el aviso de simulación académica](../evidence/capturas/20-movil-375-formulario-donacion.png)
+
+![Figura: Historial del donante a 375 px tras simular la confirmación](../evidence/capturas/21-movil-375-mis-donaciones-confirmada.png)
 
 Las cabeceras de seguridad que entrega CloudFront se verificaron en el navegador (CA-NF11.2):
 
