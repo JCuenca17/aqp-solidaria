@@ -98,7 +98,7 @@ Tercer documento del ciclo de desarrollo dirigido por especificación (SDD): `re
 
 - [ ] **8. Cuenta AWS Free plan segura**
   - [x] 8.1 Crear la cuenta Free plan.
-  - [ ] 8.2 MFA en el AWS Builder ID del dueño (la cuenta nueva no tiene usuario root): settings.aws.com → *Manage security and sign-in*.
+  - [x] 8.2 MFA en el AWS Builder ID del dueño (la cuenta nueva no tiene usuario root): settings.aws.com → *Manage security and sign-in*. Hecho el 11/11: TOTP registrado y correo de recuperación añadido.
   - [x] 8.3 Región: asignada por AWS según el país (Perú → `us-east-2`, Ohio); plantilla y scripts ajustados.
   - [ ] 8.4 Presupuesto de gasto cero en AWS Budgets (captura).
   - [ ] 8.5 Invitar a cada integrante como miembro del equipo (Builder ID propio con MFA); sin usuarios IAM de consola ni llaves (captura).
