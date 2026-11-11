@@ -1,0 +1,20 @@
+node_modules/
+dist/
+.aws-sam/
+coverage/
+*.log
+
+# Configuración local: nunca subir .env reales (CA-NF01.2)
+.env
+.env.*
+!.env.example
+
+# Tokens o credenciales copiados por error
+*.pem
+*token*.txt
+credentials*
+
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
