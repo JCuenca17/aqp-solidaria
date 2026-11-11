@@ -32,4 +32,5 @@
 - Hasta la protección de `main` (11/11), los cambios se subieron directamente a `main` por el plazo de entrega, sin revisión por PR. Desde ese momento todo cambio entra por PR con revisión de otro integrante.
 - La prueba T08 unitaria simula la respuesta de DynamoDB. La garantía real la da la ejecución de `scripts/security-tests.mjs` contra AWS.
 - La accesibilidad se diseñó con criterios WCAG 2.2 AA (etiquetas, foco visible, mensajes `role="alert"`), pero falta una revisión manual con lector de pantalla.
-- No se compartieron con el asistente credenciales AWS, tokens, archivos `.env` reales ni datos personales. El asistente no ejecutó comandos sobre la cuenta AWS.
+- No se compartieron con el asistente credenciales AWS, contraseñas ni archivos `.env`. Algunas capturas de pantalla compartidas durante el despliegue mostraban tokens de usuarios de prueba ficticios (expirados a los 15 minutos), la clave TOTP del usuario de prueba `gestor` y correos institucionales. Antes de publicar cualquier captura en `evidence/capturas/` se tapó o recortó esa información, y la captura con la clave TOTP se excluyó.
+- El asistente no ejecutó comandos sobre la cuenta AWS: los despliegues y las pruebas los ejecutó el equipo en CloudShell. El asistente solo hizo consultas HTTP de lectura a los endpoints públicos de la demo para verificar CORS y las cabeceras.
