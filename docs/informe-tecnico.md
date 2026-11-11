@@ -22,6 +22,7 @@ Se trabajó con **desarrollo dirigido por especificación** (SDD): `requirements
 | 11/11 | Cuenta Free plan (nueva experiencia de AWS), MFA, presupuesto, equipo, despliegue, usuarios de prueba y TOTP | WebUrl activa, capturas en `evidence/capturas/` |
 | 11/11 | Pruebas T01–T14, rendimiento y evidencias | `evidence/` |
 | 12–13/11 | Revisión por PR, capturas pendientes, ensayo de la demo y entrega | Informe final |
+Tabla: Cronograma de trabajo (10–13/11/2026).
 
 **Roles del equipo** (design.md §9):
 
@@ -32,6 +33,7 @@ Se trabajó con **desarrollo dirigido por especificación** (SDD): `requirements
 | Hidalgo Chinchay Paulo André | Backend | Donaciones, idempotencia y transacciones en DynamoDB |
 | Mamani Solórzano Efraín Alex | Frontend | SPA React, login OIDC, accesibilidad |
 | Soto Ccoya Gabriel Eduardo | QA y documentación | Pruebas T01–T14, evidencias e informe |
+Tabla: Roles del equipo.
 
 ## 3. Arquitectura
 
@@ -46,6 +48,7 @@ Serverless modular en un solo repositorio (AD-02): SPA React estática en S3 pri
 | `read-donations` | `GET /v1/donations/me`, `/{id}` | Donations: Get, Query del GSI; Audit: Put |
 | `audit-query` | `GET /v1/audit` | Audit: Query/Put |
 | `pre-auth` | Trigger de Cognito | Cognito: `AdminGetUser`, `AdminListGroupsForUser` |
+Tabla: Funciones Lambda, rutas y permisos sobre DynamoDB.
 
 **Límites de confianza:** navegador (no confiable) → API Gateway (verifica el JWT) → Lambda (verifica rol, propietario y reglas de negocio) → DynamoDB (limitado por IAM en cada función).
 
@@ -79,6 +82,7 @@ El despliegue se hizo el 11/11 desde AWS CloudShell con `bash scripts/deploy.sh`
 | PE | Módulo `backend/src/authz`: identidad solo desde claims verificados, matriz `POLICY` (grupo + scope) y ownership contra el recurso persistido |
 | PA | Cognito: Authorization Code + PKCE, access token de 15 min, revocación del refresh token, MFA TOTP |
 | Fuentes | Claims, estado en DynamoDB, CloudWatch Logs, CloudTrail |
+Tabla: Componentes de NIST SP 800-207 en el sistema.
 
 ### 4.2 Mapeo a los 7 principios
 
@@ -91,6 +95,7 @@ El despliegue se hizo el 11/11 desde AWS CloudShell con `bash scripts/deploy.sh`
 | 5. Postura de activos | **Parcial**: CloudTrail, Dependabot y `npm audit`; sin postura de dispositivo | Limitación |
 | 6. AuthN/AuthZ estrictas | JWT authorizer + `authz` + MFA para GESTOR/AUDITOR | T02, T11, T14 |
 | 7. Recolectar información | Logs JSON con `requestId`, `AuditEvents` (incluye `ACCESS_DENIED`), CloudTrail | Access logs en CloudWatch (§8) |
+Tabla: Mapeo de controles a los siete principios de NIST SP 800-207.
 
 ### 4.3 Decisiones relevantes
 
@@ -130,6 +135,7 @@ Resultado de T08 contra AWS (11/11): 200×1, 409×9 y un único incremento de S/
 | Backend: authz | 22 | Matriz de permisos, ID token, ownership, seudonimización |
 | Backend: handlers | 26 | T01, T03–T09, T12 con DynamoDB simulado; auditoría; reintento transaccional |
 | Frontend | 4 | Sin datos de pago, aviso de simulación, accesibilidad del error, céntimos + Idempotency-Key |
+Tabla: Pruebas automáticas ejecutadas en el CI.
 
 ### 6.2 Aceptación contra el stage `academic`
 
@@ -149,6 +155,7 @@ Resultado de T08 contra AWS (11/11): 200×1, 409×9 y un único incremento de S/
 | T12 | Gestor consulta historial ajeno | 403/404 | /me 403, por id 403 | ídem |
 | T13 | Token revocado antes de expirar | Aceptado hasta expirar | 200 en 12 consultas tras «Salir» (20:32–20:43 UTC); 401 a las 20:44:44, 7 s después de expirar | `evidence/t13-revocation.md` |
 | T14 | GESTOR sin segundo factor | Sin tokens | Reto SOFTWARE_TOKEN_MFA, sin tokens; login web pide TOTP | `evidence/t14-mfa.md` + captura |
+Tabla: Resultados de las pruebas de aceptación T01–T14 contra el stage académico.
 
 ![Figura: Ejecución de las pruebas T01–T12 contra el stage académico (primera corrida, con el hallazgo de T11)](../evidence/capturas/11-security-tests-t01-t12.png)
 
