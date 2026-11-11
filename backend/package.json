@@ -1,0 +1,37 @@
+{
+  "name": "aqp-solidaria-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "API serverless (Lambda Node.js 24) de la Plataforma de Donaciones Seguras AQP-SOLIDARIA",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "node scripts/build.mjs",
+    "format": "prettier --write .",
+    "seed": "node scripts/seed-projects.mjs"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "3.1166.0",
+    "@aws-sdk/client-dynamodb": "3.1166.0",
+    "@aws-sdk/lib-dynamodb": "3.1166.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/aws-lambda": "8.10.164",
+    "@types/node": "26.6.6",
+    "aws-sdk-client-mock": "4.1.0",
+    "esbuild": "0.28.2",
+    "eslint": "10.14.0",
+    "globals": "17.14.0",
+    "prettier": "3.9.10",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.2",
+    "vitest": "5.1.0"
+  }
+}
