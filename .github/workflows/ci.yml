@@ -1,0 +1,80 @@
+# RNF-HU-08 / CA-NF08.1: lint, typecheck, tests y build en cada PR (y en main).
+# Sin credenciales AWS: el CI no despliega (CA-NF03.2).
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: npm audit (dependencias de producción)
+        run: npm audit --omit=dev --audit-level=high
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/package-lock.json
+      # El frontend reutiliza los esquemas Zod de backend/src/shared.
+      - run: npm ci --no-audit --no-fund
+        working-directory: backend
+      - run: npm ci --no-audit --no-fund
+        working-directory: frontend
+      - run: npm run lint
+        working-directory: frontend
+      - run: npm run typecheck
+        working-directory: frontend
+      - run: npm test
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+        env:
+          VITE_API_URL: https://example.execute-api.us-east-1.amazonaws.com/academic
+          VITE_COGNITO_AUTHORITY: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_EXAMPLE
+          VITE_COGNITO_DOMAIN: https://example.auth.us-east-1.amazoncognito.com
+          VITE_CLIENT_ID: example
+      - name: npm audit (dependencias de producción)
+        run: npm audit --omit=dev --audit-level=high
+        working-directory: frontend
+
+  infra:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: pip install cfn-lint==1.60.0
+      - name: cfn-lint de la plantilla SAM
+        run: cfn-lint infra/template.yaml

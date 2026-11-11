@@ -1,0 +1,263 @@
+openapi: 3.1.0
+info:
+  title: AQP-SOLIDARIA — API de Donaciones Seguras
+  version: 1.0.0
+  description: |
+    Prototipo académico (TAIS, EPIS-UNSA). Donaciones SIMULADAS: no se procesan pagos.
+    Las rutas protegidas exigen un **access token** de Cognito (Authorization Code + PKCE) con el
+    scope indicado; un ID token es rechazado con 401 por el JWT authorizer. Además del scope, el
+    backend verifica el grupo (`cognito:groups`) y la propiedad del recurso en cada solicitud.
+servers:
+  - url: https://{apiId}.execute-api.us-east-1.amazonaws.com/academic
+    variables:
+      apiId: { default: xxxxxxxxxx }
+
+tags:
+  - name: Proyectos
+  - name: Donaciones
+  - name: Auditoría
+
+components:
+  securitySchemes:
+    cognito:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://aqp-solidaria-ACCOUNT.auth.us-east-1.amazoncognito.com/oauth2/authorize
+          tokenUrl: https://aqp-solidaria-ACCOUNT.auth.us-east-1.amazoncognito.com/oauth2/token
+          scopes:
+            api/projects.write: Crear y publicar proyectos (grupo GESTOR)
+            api/donations.write: Registrar y simular donaciones (grupo DONANTE)
+            api/donations.read: Leer historial propio (grupo DONANTE)
+            api/audit.read: Consultar auditoría (grupo AUDITOR)
+  parameters:
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    DonationId:
+      name: donationId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+  schemas:
+    Error:
+      type: object
+      required: [code, message, requestId]
+      properties:
+        code: { type: string, examples: [FORBIDDEN] }
+        message: { type: string }
+        requestId: { type: string }
+    Project:
+      type: object
+      properties:
+        projectId: { type: string, format: uuid }
+        title: { type: string }
+        description: { type: string }
+        goalAmountCents: { type: integer, minimum: 1 }
+        confirmedAmountCents: { type: integer, minimum: 0 }
+        currency: { type: string, const: PEN }
+        status: { type: string, enum: [BORRADOR, PUBLICADO] }
+        createdAt: { type: string, format: date-time }
+    ProjectStats:
+      type: object
+      properties:
+        projectId: { type: string, format: uuid }
+        currency: { type: string, const: PEN }
+        goalAmountCents: { type: integer }
+        confirmedAmountCents: { type: integer, description: Solo donaciones CONFIRMADA_SIMULADA }
+        confirmedDonationsCount: { type: integer }
+        progressPercent: { type: integer, minimum: 0, maximum: 100 }
+    CreateProject:
+      type: object
+      additionalProperties: false
+      required: [title, description, goalAmountCents]
+      properties:
+        title: { type: string, minLength: 5, maxLength: 120 }
+        description: { type: string, minLength: 20, maxLength: 2000 }
+        goalAmountCents: { type: integer, minimum: 1, maximum: 1000000000 }
+    CreateDonation:
+      type: object
+      additionalProperties: false
+      required: [projectId, amountCents]
+      properties:
+        projectId: { type: string, format: uuid }
+        amountCents: { type: integer, minimum: 100, maximum: 100000, description: 'S/ 1.00 – S/ 1,000.00' }
+    Donation:
+      type: object
+      properties:
+        donationId: { type: string, format: uuid }
+        projectId: { type: string, format: uuid }
+        projectTitle: { type: string }
+        amountCents: { type: integer }
+        currency: { type: string, const: PEN }
+        status: { type: string, enum: [PENDIENTE_SIMULACION, CONFIRMADA_SIMULADA, RECHAZADA_SIMULADA] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    AuditEvent:
+      type: object
+      properties:
+        eventType: { type: string, enum: [PROJECT_CREATE, PROJECT_PUBLISH, DONATION_CREATE, DONATION_SIMULATE, ACCESS_DENIED] }
+        eventId: { type: string }
+        timestamp: { type: string, format: date-time }
+        requestId: { type: string }
+        actorRef: { type: string, description: Seudónimo (hash) del sub; nunca el sub en claro }
+        action: { type: string }
+        resourceRef: { type: string }
+        outcome: { type: string, enum: [EXITO, RECHAZADO] }
+  responses:
+    BadRequest: { description: Entrada inválida, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    Unauthorized: { description: Sin token, token expirado/alterado, de otro cliente o ID token }
+    Forbidden: { description: Rol sin permiso, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    NotFound: { description: No existe o no pertenece al solicitante (no se distingue), content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    Conflict: { description: Estado incompatible o clave de idempotencia reutilizada, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+
+paths:
+  /v1/projects:
+    get:
+      tags: [Proyectos]
+      summary: Catálogo público (solo PUBLICADO) — HU-01
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/Project' } } } }
+    post:
+      tags: [Proyectos]
+      summary: Crear proyecto en BORRADOR — HU-08 (GESTOR)
+      security: [{ cognito: [api/projects.write] }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/CreateProject' } } }
+      responses:
+        '201': { description: Creado, content: { application/json: { schema: { $ref: '#/components/schemas/Project' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /v1/projects/{projectId}:
+    get:
+      tags: [Proyectos]
+      summary: Detalle público — HU-02
+      security: []
+      parameters: [{ $ref: '#/components/parameters/ProjectId' }]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Project' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /v1/projects/{projectId}/stats:
+    get:
+      tags: [Proyectos]
+      summary: Indicadores agregados — HU-09
+      security: []
+      parameters: [{ $ref: '#/components/parameters/ProjectId' }]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/ProjectStats' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /v1/projects/{projectId}/publish:
+    patch:
+      tags: [Proyectos]
+      summary: Publicar un BORRADOR — HU-08 (GESTOR)
+      security: [{ cognito: [api/projects.write] }]
+      parameters: [{ $ref: '#/components/parameters/ProjectId' }]
+      responses:
+        '200': { description: Publicado, content: { application/json: { schema: { $ref: '#/components/schemas/Project' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /v1/manage/projects:
+    get:
+      tags: [Proyectos]
+      summary: Listado de gestión (BORRADOR y PUBLICADO) — HU-08 (GESTOR)
+      security: [{ cognito: [api/projects.write] }]
+      responses:
+        '200': { description: OK }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /v1/donations:
+    post:
+      tags: [Donaciones]
+      summary: Registrar intención de donación simulada — HU-05 (DONANTE)
+      security: [{ cognito: [api/donations.write] }]
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/CreateDonation' } } }
+      responses:
+        '201':
+          description: Creada en PENDIENTE_SIMULACION (o repetición idempotente con cabecera Idempotent-Replayed)
+          content: { application/json: { schema: { $ref: '#/components/schemas/Donation' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /v1/donations/{donationId}/simulate:
+    post:
+      tags: [Donaciones]
+      summary: Simular confirmación o rechazo — HU-06 (DONANTE propietario; solo stage academic)
+      security: [{ cognito: [api/donations.write] }]
+      parameters: [{ $ref: '#/components/parameters/DonationId' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [outcome]
+              properties: { outcome: { type: string, enum: [CONFIRMAR, RECHAZAR] } }
+      responses:
+        '200': { description: Transición aplicada, content: { application/json: { schema: { $ref: '#/components/schemas/Donation' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /v1/donations/me:
+    get:
+      tags: [Donaciones]
+      summary: Historial propio — HU-07 (DONANTE)
+      security: [{ cognito: [api/donations.read] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/Donation' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /v1/donations/{donationId}:
+    get:
+      tags: [Donaciones]
+      summary: Una donación propia — HU-07 (ajena => 404)
+      security: [{ cognito: [api/donations.read] }]
+      parameters: [{ $ref: '#/components/parameters/DonationId' }]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Donation' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /v1/audit:
+    get:
+      tags: [Auditoría]
+      summary: Eventos de auditoría — HU-10 (AUDITOR con MFA)
+      security: [{ cognito: [api/audit.read] }]
+      parameters:
+        - { name: eventType, in: query, schema: { type: string, enum: [PROJECT_CREATE, PROJECT_PUBLISH, DONATION_CREATE, DONATION_SIMULATE, ACCESS_DENIED] } }
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/AuditEvent' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
