@@ -106,8 +106,8 @@ Tercer documento del ciclo de desarrollo dirigido por especificación (SDD): `re
   - _Requisitos: RNF-HU-03 (CA-NF03.3), RNF-HU-09 (CA-NF09.1)_ · _Guía: `docs/guia-cuenta-aws.md`_
 
 - [ ] **9. Repositorio en GitHub**
-  - [~] 9.1 Publicar el repositorio y proteger `main` (PR + 1 revisión + CI obligatorio). Publicado el 11/11 (github.com/JCuenca17/aqp-solidaria), CI en verde; falta proteger `main`.
-  - [ ] 9.2 Invitar a los integrantes; verificar el CI en verde.
+  - [x] 9.1 Publicar el repositorio y proteger `main` (PR + 1 revisión + CI obligatorio). Publicado el 11/11 y `main` protegida ese mismo día: PR obligatorio, 1 aprobación de otro integrante, checks `backend`, `frontend` e `infra` en verde, sin force-push ni borrado.
+  - [ ] 9.2 Invitar a los integrantes como colaboradores del repo (necesitan su usuario de GitHub) para que puedan revisar PR; CI en verde verificado.
   - _Requisitos: RNF-HU-08, DoD (e)_
 
 - [ ] **10. Despliegue en el stage `academic`**
@@ -130,8 +130,8 @@ Tercer documento del ciclo de desarrollo dirigido por especificación (SDD): `re
   - _Requisitos: DoD (b), (c)_ · _Evidencia: `evidence/`_
 
 - [ ] **12. Documentación y entrega**
-  - [ ] 12.1 Completar los `[ ]` del informe técnico con los resultados reales.
-  - [ ] 12.2 Completar `AI_USAGE.md` (participantes, PR, validación humana).
+  - [~] 12.1 Completar los `[ ]` del informe técnico con los resultados reales. T01–T14, rendimiento, equipo y roles completados; faltan las capturas pendientes (11.6, 11.7) y las conclusiones.
+  - [~] 12.2 Completar `AI_USAGE.md` (participantes, PR, validación humana). Participantes y validación humana completados; faltan las revisiones humanas por artefacto.
   - [ ] 12.3 Ensayar la demo con los cuatro roles; cada integrante explica su módulo.
   - _Requisitos: DoD (a), (f), (g)_
 
