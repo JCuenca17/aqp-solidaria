@@ -1,0 +1,607 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  AQP-SOLIDARIA - Plataforma de Donaciones Seguras (prototipo académico, TAIS EPIS-UNSA).
+  Serverless + Zero Trust (NIST SP 800-207). Donaciones SIMULADAS: no procesa pagos.
+
+# Requisito previo: `npm ci && npm run build` en backend/ (genera backend/dist/<función>/index.mjs).
+
+Parameters:
+  Stage:
+    Type: String
+    Default: academic
+    AllowedValues: [academic, prod]
+    Description: El endpoint de simulación (HU-06) solo existe en el stage academic (CA-06.1).
+  ProjectName:
+    Type: String
+    Default: aqp-solidaria
+    AllowedPattern: '^[a-z0-9-]{3,30}$'
+  AllowLocalhost:
+    Type: String
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+    Description: Permite http://localhost:5173 como callback y origen CORS solo para desarrollo local.
+
+Conditions:
+  IsAcademic: !Equals [!Ref Stage, academic]
+  UseLocalhost: !Equals [!Ref AllowLocalhost, 'true']
+
+Globals:
+  Function:
+    Runtime: nodejs24.x
+    Architectures: [arm64]
+    MemorySize: 256
+    Timeout: 10
+    Handler: index.handler
+    Environment:
+      Variables:
+        STAGE: !Ref Stage
+        PROJECTS_TABLE: !Ref ProjectsTable
+        DONATIONS_TABLE: !Ref DonationsTable
+        IDEMPOTENCY_TABLE: !Ref IdempotencyTable
+        AUDIT_TABLE: !Ref AuditTable
+        NODE_OPTIONS: --enable-source-maps
+    Tags:
+      Project: !Ref ProjectName
+
+Resources:
+  # ───────────────────────────── Persistencia (DynamoDB on-demand) ─────────────────────────────
+  ProjectsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: projectId, AttributeType: S }
+        - { AttributeName: status, AttributeType: S }
+        - { AttributeName: createdAt, AttributeType: S }
+      KeySchema:
+        - { AttributeName: projectId, KeyType: HASH }
+      GlobalSecondaryIndexes:
+        - IndexName: status-createdAt
+          KeySchema:
+            - { AttributeName: status, KeyType: HASH }
+            - { AttributeName: createdAt, KeyType: RANGE }
+          Projection: { ProjectionType: ALL }
+      SSESpecification: { SSEEnabled: true }
+
+  DonationsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: donationId, AttributeType: S }
+        - { AttributeName: donorSub, AttributeType: S }
+        - { AttributeName: createdAt, AttributeType: S }
+      KeySchema:
+        - { AttributeName: donationId, KeyType: HASH }
+      GlobalSecondaryIndexes:
+        - IndexName: donorSub-createdAt
+          KeySchema:
+            - { AttributeName: donorSub, KeyType: HASH }
+            - { AttributeName: createdAt, KeyType: RANGE }
+          Projection: { ProjectionType: ALL }
+      SSESpecification: { SSEEnabled: true }
+
+  IdempotencyTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: pk, AttributeType: S }
+      KeySchema:
+        - { AttributeName: pk, KeyType: HASH }
+      TimeToLiveSpecification: { AttributeName: expiresAt, Enabled: true }
+      SSESpecification: { SSEEnabled: true }
+
+  AuditTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: eventType, AttributeType: S }
+        - { AttributeName: sk, AttributeType: S }
+      KeySchema:
+        - { AttributeName: eventType, KeyType: HASH }
+        - { AttributeName: sk, KeyType: RANGE }
+      SSESpecification: { SSEEnabled: true }
+
+  # ───────────────────────────── Identidad (Cognito = Policy Administrator) ─────────────────────────────
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub ${ProjectName}-${Stage}
+      UsernameAttributes: [email]
+      AutoVerifiedAttributes: [email]
+      # Solo el equipo crea usuarios de prueba (RNF-HU-10: identidades ficticias).
+      AdminCreateUserConfig: { AllowAdminCreateUserOnly: true }
+      # OPTIONAL en el pool (el donante puede no usarlo); el trigger PreAuth lo vuelve
+      # obligatorio para GESTOR y AUDITOR (HU-11). Solo TOTP, nunca SMS (CA-11.1).
+      MfaConfiguration: 'OPTIONAL'
+      EnabledMfas: [SOFTWARE_TOKEN_MFA]
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireLowercase: true
+          RequireUppercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          TemporaryPasswordValidityDays: 3
+      AccountRecoverySetting:
+        RecoveryMechanisms: [{ Name: verified_email, Priority: 1 }]
+      LambdaConfig:
+        PreAuthentication: !GetAtt PreAuthFunction.Arn
+      DeletionProtection: INACTIVE
+      UserPoolTags:
+        Project: !Ref ProjectName
+
+  GroupDonante:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties: { UserPoolId: !Ref UserPool, GroupName: DONANTE, Description: Donante de prueba }
+  GroupGestor:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties: { UserPoolId: !Ref UserPool, GroupName: GESTOR, Description: Gestor de proyectos (MFA obligatorio) }
+  GroupAuditor:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties: { UserPoolId: !Ref UserPool, GroupName: AUDITOR, Description: Auditor (MFA obligatorio) }
+
+  ApiResourceServer:
+    Type: AWS::Cognito::UserPoolResourceServer
+    Properties:
+      UserPoolId: !Ref UserPool
+      Identifier: api
+      Name: AQP-SOLIDARIA API
+      Scopes:
+        - { ScopeName: projects.write, ScopeDescription: Crear y publicar proyectos }
+        - { ScopeName: donations.write, ScopeDescription: Registrar y simular donaciones }
+        - { ScopeName: donations.read, ScopeDescription: Leer historial propio }
+        - { ScopeName: audit.read, ScopeDescription: Consultar auditoría }
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      UserPoolId: !Ref UserPool
+      Domain: !Sub ${ProjectName}-${AWS::AccountId}
+      ManagedLoginVersion: 1
+
+  # Cliente público de la SPA: Authorization Code + PKCE, sin secreto, sin flujo implícito (CA-03.1).
+  SpaClient:
+    Type: AWS::Cognito::UserPoolClient
+    DependsOn: ApiResourceServer
+    Properties:
+      UserPoolId: !Ref UserPool
+      ClientName: !Sub ${ProjectName}-spa
+      GenerateSecret: false
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows: [code]
+      AllowedOAuthScopes:
+        - openid
+        - email
+        - api/projects.write
+        - api/donations.write
+        - api/donations.read
+        - api/audit.read
+      SupportedIdentityProviders: [COGNITO]
+      CallbackURLs: !If
+        - UseLocalhost
+        - [!Sub 'https://${Distribution.DomainName}/callback', 'http://localhost:5173/callback']
+        - [!Sub 'https://${Distribution.DomainName}/callback']
+      LogoutURLs: !If
+        - UseLocalhost
+        - [!Sub 'https://${Distribution.DomainName}/', 'http://localhost:5173/']
+        - [!Sub 'https://${Distribution.DomainName}/']
+      ExplicitAuthFlows: [ALLOW_USER_SRP_AUTH, ALLOW_REFRESH_TOKEN_AUTH]
+      # CA-03.3 / AD-07: access token de 15 min; refresh revocable.
+      AccessTokenValidity: 15
+      IdTokenValidity: 15
+      RefreshTokenValidity: 480
+      TokenValidityUnits: { AccessToken: minutes, IdToken: minutes, RefreshToken: minutes }
+      EnableTokenRevocation: true
+      PreventUserExistenceErrors: ENABLED
+
+  # Cliente administrativo SIN OAuth: solo para enrolar TOTP con scripts/enroll-totp.sh desde
+  # CloudShell (credenciales IAM temporales). Sus tokens no tienen scopes api/* => no sirven en la API.
+  AdminClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      ClientName: !Sub ${ProjectName}-admin-enrolamiento
+      GenerateSecret: false
+      ExplicitAuthFlows: [ALLOW_ADMIN_USER_PASSWORD_AUTH, ALLOW_REFRESH_TOKEN_AUTH]
+      AccessTokenValidity: 5
+      IdTokenValidity: 5
+      RefreshTokenValidity: 60
+      TokenValidityUnits: { AccessToken: minutes, IdToken: minutes, RefreshToken: minutes }
+      EnableTokenRevocation: true
+      PreventUserExistenceErrors: ENABLED
+
+  PreAuthLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: !Sub '/aqp/${Stage}/pre-auth', RetentionInDays: 14 }
+
+  PreAuthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../backend/dist/pre-auth
+      Description: HU-11 - bloquea GESTOR/AUDITOR sin TOTP
+      LoggingConfig: { LogGroup: !Ref PreAuthLogGroup }
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            # Se usa userpool/* de ESTA cuenta y región porque referenciar el ARN exacto
+            # crea una dependencia circular (el pool referencia a esta función). Justificado.
+            - Effect: Allow
+              Action: [cognito-idp:AdminGetUser, cognito-idp:AdminListGroupsForUser]
+              Resource: !Sub 'arn:${AWS::Partition}:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/*'
+
+  PreAuthPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt PreAuthFunction.Arn
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !GetAtt UserPool.Arn
+
+  # ───────────────────────────── API (HTTP API + JWT authorizer = PEP) ─────────────────────────────
+  ApiAccessLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: !Sub '/aqp/${Stage}/api-access', RetentionInDays: 14 }
+
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Stage
+      Auth:
+        Authorizers:
+          CognitoJwt:
+            IdentitySource: $request.header.Authorization
+            JwtConfiguration:
+              issuer: !Sub 'https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}'
+              # En access tokens de Cognito se compara contra el claim client_id (no hay aud).
+              audience: [!Ref SpaClient]
+      CorsConfiguration:
+        AllowOrigins: !If
+          - UseLocalhost
+          - [!Sub 'https://${Distribution.DomainName}', 'http://localhost:5173']
+          - [!Sub 'https://${Distribution.DomainName}']
+        AllowHeaders: [authorization, content-type, idempotency-key]
+        AllowMethods: [GET, POST, PATCH, OPTIONS]
+        ExposeHeaders: [idempotent-replayed]
+        MaxAge: 600
+      # Abuso / fuerza bruta (design.md §6.2): throttling por stage.
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 50
+        ThrottlingRateLimit: 25
+      AccessLogSettings:
+        DestinationArn: !GetAtt ApiAccessLogGroup.Arn
+        # Sin cabeceras, IP ni cuerpos: nada de tokens ni datos personales en logs (CA-NF01.2).
+        Format: '{"requestId":"$context.requestId","routeKey":"$context.routeKey","status":"$context.status","latencyMs":"$context.responseLatency","authorizerError":"$context.authorizer.error","integrationError":"$context.integrationErrorMessage","time":"$context.requestTime"}'
+      Tags:
+        Project: !Ref ProjectName
+
+  # ───────────────────────────── Funciones (un rol IAM mínimo por función) ─────────────────────────────
+  PublicProjectsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: !Sub '/aqp/${Stage}/public-projects', RetentionInDays: 14 }
+
+  PublicProjectsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../backend/dist/public-projects
+      Description: HU-01/02/09 lectura pública (SOLO lectura; T10)
+      LoggingConfig: { LogGroup: !Ref PublicProjectsLogGroup }
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:Query]
+              Resource:
+                - !GetAtt ProjectsTable.Arn
+                - !Sub '${ProjectsTable.Arn}/index/status-createdAt'
+      Events:
+        List:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: /v1/projects, Method: GET, Auth: { Authorizer: NONE } }
+        Detail:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: '/v1/projects/{projectId}', Method: GET, Auth: { Authorizer: NONE } }
+        Stats:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: '/v1/projects/{projectId}/stats', Method: GET, Auth: { Authorizer: NONE } }
+
+  ManageProjectsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: !Sub '/aqp/${Stage}/manage-projects', RetentionInDays: 14 }
+
+  ManageProjectsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../backend/dist/manage-projects
+      Description: HU-08 gestión de proyectos (GESTOR)
+      LoggingConfig: { LogGroup: !Ref ManageProjectsLogGroup }
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:Query]
+              Resource:
+                - !GetAtt ProjectsTable.Arn
+                - !Sub '${ProjectsTable.Arn}/index/status-createdAt'
+            - Effect: Allow
+              Action: [dynamodb:PutItem]
+              Resource: !GetAtt AuditTable.Arn
+      Events:
+        Create:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /v1/projects
+            Method: POST
+            Auth: { Authorizer: CognitoJwt, AuthorizationScopes: [api/projects.write] }
+        Publish:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: '/v1/projects/{projectId}/publish'
+            Method: PATCH
+            Auth: { Authorizer: CognitoJwt, AuthorizationScopes: [api/projects.write] }
+        ListAll:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /v1/manage/projects
+            Method: GET
+            Auth: { Authorizer: CognitoJwt, AuthorizationScopes: [api/projects.write] }
+
+  CreateDonationLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: !Sub '/aqp/${Stage}/create-donation', RetentionInDays: 14 }
+
+  CreateDonationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../backend/dist/create-donation
+      Description: HU-05 intención de donación con idempotencia atómica
+      LoggingConfig: { LogGroup: !Ref CreateDonationLogGroup }
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:ConditionCheckItem]
+              Resource: !GetAtt ProjectsTable.Arn
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:PutItem]
+              Resource: [!GetAtt IdempotencyTable.Arn, !GetAtt DonationsTable.Arn]
+            - Effect: Allow
+              Action: [dynamodb:PutItem]
+              Resource: !GetAtt AuditTable.Arn
+      Events:
+        Create:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /v1/donations
+            Method: POST
+            Auth: { Authorizer: CognitoJwt, AuthorizationScopes: [api/donations.write] }
+
+  SimulateDonationLogGroup:
+    Type: AWS::Logs::LogGroup
+    Condition: IsAcademic
+    Properties: { LogGroupName: !Sub '/aqp/${Stage}/simulate-donation', RetentionInDays: 14 }
+
+  # CA-06.1: solo existe en el stage academic.
+  SimulateDonationFunction:
+    Type: AWS::Serverless::Function
+    Condition: IsAcademic
+    Properties:
+      CodeUri: ../backend/dist/simulate-donation
+      Description: HU-06 simulación académica (solo stage academic)
+      LoggingConfig: { LogGroup: !Ref SimulateDonationLogGroup }
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:UpdateItem]
+              Resource: !GetAtt DonationsTable.Arn
+            - Effect: Allow
+              Action: [dynamodb:UpdateItem]
+              Resource: !GetAtt ProjectsTable.Arn
+            - Effect: Allow
+              Action: [dynamodb:PutItem]
+              Resource: !GetAtt AuditTable.Arn
+      Events:
+        Simulate:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: '/v1/donations/{donationId}/simulate'
+            Method: POST
+            Auth: { Authorizer: CognitoJwt, AuthorizationScopes: [api/donations.write] }
+
+  ReadDonationsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: !Sub '/aqp/${Stage}/read-donations', RetentionInDays: 14 }
+
+  ReadDonationsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../backend/dist/read-donations
+      Description: HU-07 historial propio (ownership)
+      LoggingConfig: { LogGroup: !Ref ReadDonationsLogGroup }
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:Query]
+              Resource:
+                - !GetAtt DonationsTable.Arn
+                - !Sub '${DonationsTable.Arn}/index/donorSub-createdAt'
+            - Effect: Allow
+              Action: [dynamodb:PutItem]
+              Resource: !GetAtt AuditTable.Arn
+      Events:
+        Mine:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /v1/donations/me
+            Method: GET
+            Auth: { Authorizer: CognitoJwt, AuthorizationScopes: [api/donations.read] }
+        One:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: '/v1/donations/{donationId}'
+            Method: GET
+            Auth: { Authorizer: CognitoJwt, AuthorizationScopes: [api/donations.read] }
+
+  AuditQueryLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: !Sub '/aqp/${Stage}/audit-query', RetentionInDays: 14 }
+
+  AuditQueryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../backend/dist/audit-query
+      Description: HU-10 consulta de auditoría (AUDITOR)
+      LoggingConfig: { LogGroup: !Ref AuditQueryLogGroup }
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: [dynamodb:Query, dynamodb:PutItem]
+              Resource: !GetAtt AuditTable.Arn
+      Events:
+        Query:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /v1/audit
+            Method: GET
+            Auth: { Authorizer: CognitoJwt, AuthorizationScopes: [api/audit.read] }
+
+  # ───────────────────────────── Frontend (S3 privado + CloudFront OAC) ─────────────────────────────
+  WebBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules: [{ ObjectOwnership: BucketOwnerEnforced }]
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: { SSEAlgorithm: AES256 }
+      Tags:
+        - { Key: Project, Value: !Ref ProjectName }
+
+  WebOac:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub ${ProjectName}-${Stage}-oac
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  # CA-NF11.2: CSP restrictiva, HSTS, nosniff y Referrer-Policy desde CloudFront.
+  SecurityHeadersPolicy:
+    Type: AWS::CloudFront::ResponseHeadersPolicy
+    Properties:
+      ResponseHeadersPolicyConfig:
+        Name: !Sub ${ProjectName}-${Stage}-security-headers
+        SecurityHeadersConfig:
+          ContentSecurityPolicy:
+            Override: true
+            ContentSecurityPolicy: !Sub >-
+              default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:;
+              font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';
+              frame-ancestors 'none'; upgrade-insecure-requests;
+              connect-src 'self' https://*.execute-api.${AWS::Region}.amazonaws.com
+              https://cognito-idp.${AWS::Region}.amazonaws.com
+              https://${ProjectName}-${AWS::AccountId}.auth.${AWS::Region}.amazoncognito.com
+          StrictTransportSecurity:
+            Override: true
+            AccessControlMaxAgeSec: 63072000
+            IncludeSubdomains: true
+            Preload: false
+          ContentTypeOptions: { Override: true }
+          FrameOptions: { Override: true, FrameOption: DENY }
+          ReferrerPolicy: { Override: true, ReferrerPolicy: strict-origin-when-cross-origin }
+
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub ${ProjectName} ${Stage} SPA
+        DefaultRootObject: index.html
+        HttpVersion: http2and3
+        PriceClass: PriceClass_100
+        Origins:
+          - Id: web
+            DomainName: !GetAtt WebBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt WebOac.Id
+            S3OriginConfig: { OriginAccessIdentity: '' }
+        DefaultCacheBehavior:
+          TargetOriginId: web
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD]
+          Compress: true
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # Managed-CachingOptimized
+          ResponseHeadersPolicyId: !Ref SecurityHeadersPolicy
+        # Rutas de la SPA (/proyectos/..., /callback) se resuelven en index.html.
+        CustomErrorResponses:
+          - { ErrorCode: 403, ResponseCode: 200, ResponsePagePath: /index.html, ErrorCachingMinTTL: 0 }
+          - { ErrorCode: 404, ResponseCode: 200, ResponsePagePath: /index.html, ErrorCachingMinTTL: 0 }
+        ViewerCertificate: { CloudFrontDefaultCertificate: true }
+      Tags:
+        - { Key: Project, Value: !Ref ProjectName }
+
+  WebBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudFrontOacOnly
+            Effect: Allow
+            Principal: { Service: cloudfront.amazonaws.com }
+            Action: s3:GetObject
+            Resource: !Sub '${WebBucket.Arn}/*'
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub 'arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${Distribution}'
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: [!GetAtt WebBucket.Arn, !Sub '${WebBucket.Arn}/*']
+            Condition: { Bool: { 'aws:SecureTransport': 'false' } }
+
+Outputs:
+  WebUrl:
+    Description: URL HTTPS de la SPA (CloudFront)
+    Value: !Sub 'https://${Distribution.DomainName}'
+  ApiUrl:
+    Description: URL base del API
+    Value: !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}'
+  UserPoolId:
+    Value: !Ref UserPool
+  SpaClientId:
+    Value: !Ref SpaClient
+  AdminClientId:
+    Value: !Ref AdminClient
+  CognitoDomain:
+    Value: !Sub 'https://${ProjectName}-${AWS::AccountId}.auth.${AWS::Region}.amazoncognito.com'
+  WebBucketName:
+    Value: !Ref WebBucket
+  DistributionId:
+    Value: !Ref Distribution
+  ProjectsTableName:
+    Value: !Ref ProjectsTable
+  PublicProjectsRoleArn:
+    Description: Rol de la función de listado, para la prueba T10 con IAM Policy Simulator
+    Value: !GetAtt PublicProjectsFunctionRole.Arn

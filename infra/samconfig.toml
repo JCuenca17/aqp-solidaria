@@ -1,0 +1,19 @@
+# Configuración de `sam deploy` (se ejecuta desde la carpeta infra/).
+version = 0.1
+
+[default.global.parameters]
+region = "us-east-1"
+
+[default.deploy.parameters]
+stack_name = "aqp-solidaria-academic"
+resolve_s3 = true
+s3_prefix = "aqp-solidaria-academic"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = false
+fail_on_empty_changeset = false
+parameter_overrides = "Stage=academic ProjectName=aqp-solidaria AllowLocalhost=true"
+tags = "Project=aqp-solidaria Course=TAIS"
+
+[default.delete.parameters]
+stack_name = "aqp-solidaria-academic"
+region = "us-east-1"
