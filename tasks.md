@@ -125,12 +125,12 @@ Tercer documento del ciclo de desarrollo dirigido por especificación (SDD): `re
   - [x] 11.3 `t13-revocation.mjs`: T13 (11/11). Token de 15 min aceptado tras revocar el refresh token hasta su expiración; 401 después.
   - [x] 11.4 `t14-mfa-check.sh` y captura del login con TOTP: T14 / CA-11.2 (11/11).
   - [x] 11.5 `perf-test.mjs` con 50 proyectos: RNF-HU-05. Final a 10 rps: 200×200, p95 38 ms. Primera corrida: p95 109 ms, pero 14/200 errores por exceder el throttling (≈100 rps contra 25 rps); el script se ajustó a 20 rps y se repite.
-  - [~] 11.6 Capturas de CloudWatch (un caso exitoso y uno 401/403) y de CloudTrail: CA-NF07.2. Captura del 401 (`missing: token not provided`) tomada; faltan la de 201 y la de CloudTrail.
-  - [ ] 11.7 Revisión manual a 375 px y con teclado: RNF-HU-06.
+  - [x] 11.6 Capturas de CloudWatch (un caso exitoso y uno 401/403) y de CloudTrail: CA-NF07.2. 401, 201 y CreateChangeSet en `evidence/capturas/` (11/11).
+  - [x] 11.7 Revisión manual a 375 px y con teclado: RNF-HU-06. Catálogo, formulario e historial a 375 px (iPhone SE) en `evidence/capturas/` (11/11).
   - _Requisitos: DoD (b), (c)_ · _Evidencia: `evidence/`_
 
 - [ ] **12. Documentación y entrega**
-  - [~] 12.1 Completar los `[ ]` del informe técnico con los resultados reales. T01–T14, rendimiento, equipo y roles completados; faltan las capturas pendientes (11.6, 11.7) y las conclusiones.
+  - [x] 12.1 Completar el informe técnico con los resultados reales: T01–T14, rendimiento, equipo, roles, capturas y conclusiones (PR #5). Versión Word generada para DUTIC.
   - [~] 12.2 Completar `AI_USAGE.md` (participantes, PR, validación humana). Participantes y validación humana completados; faltan las revisiones humanas por artefacto.
   - [ ] 12.3 Ensayar la demo con los cuatro roles; cada integrante explica su módulo.
   - _Requisitos: DoD (a), (f), (g)_
