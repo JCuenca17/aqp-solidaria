@@ -114,7 +114,7 @@ Resultado de T08 contra AWS (11/11): 200×1, 409×9 y un único incremento de S/
 | T07 | Misma clave, otra carga | 409 | 409 | ídem |
 | T08 | 10 confirmaciones concurrentes | Un solo incremento | 200×1, 409×9, incremento único de S/ 7.00 | ídem |
 | T09 | Donación ajena | 403/404 | GET 404, simulate 404, sin filtración | ídem |
-| T10 | Lambda de listado intenta escribir | AccessDenied | [ ] | `evidence/t10-iam-simulator.md` |
+| T10 | Lambda de listado intenta escribir | AccessDenied | Put/Update/Delete: implicitDeny; Get/Query: allowed (control) | `evidence/t10-iam-simulator.md` |
 | T11 | ID token / token alterado | 401 (ID token: 403, ver §4.4) | ID token 403, alterado 401, basura 401 | `evidence/security-tests-*.md` |
 | T12 | Gestor consulta historial ajeno | 403/404 | /me 403, por id 403 | ídem |
 | T13 | Token revocado antes de expirar | Aceptado hasta expirar | [ ] | `evidence/t13-revocation.md` |
