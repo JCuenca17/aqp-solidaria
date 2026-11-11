@@ -122,7 +122,7 @@ Resultado de T08 contra AWS (11/11): 200×1, 409×9 y un único incremento de S/
 
 ### 6.3 Rendimiento (RNF-HU-05)
 
-Método: 50 proyectos publicados con `seed-projects.mjs`; `perf-test.mjs` desde CloudShell us-east-2 (misma región que el API), 5 solicitudes de calentamiento descartadas y 200 medidas con concurrencia 5. Resultado: p95 = [ ] ms (criterio ≤ 1500 ms).
+Método: 50 proyectos publicados con `seed-projects.mjs`; `perf-test.mjs` desde CloudShell us-east-2 (misma región que el API), 5 solicitudes de calentamiento descartadas y 200 medidas a ritmo constante, mitad a `/v1/projects` y mitad a `/v1/projects/{id}`. Resultado final (11/11, 10 solicitudes/s): 200×200 respuestas, **p50 = 22 ms, p95 = 38 ms, p99 = 77 ms** (criterio ≤ 1500 ms: cumple). En corridas previas a más velocidad aparecieron respuestas 429: el throttling del stage está configurado en 25 rps / ráfaga 50 y el de la cuenta en 10 000 rps, así que los 429 a 20 rps se atribuyen a un límite inferior de la cuenta nueva [causa por confirmar en los access logs]. Los percentiles se calculan solo con respuestas 200 y se reporta aparte cada código HTTP.
 
 ## 7. Experiencia de usuario y accesibilidad (RNF-HU-06)
 

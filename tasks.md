@@ -124,7 +124,7 @@ Tercer documento del ciclo de desarrollo dirigido por especificación (SDD): `re
   - [x] 11.2 `t10-iam-check.sh`: T10 (11/11). Escrituras implicitDeny, lecturas allowed. El primer intento sin contexto de región dio explicitDeny en todo por las SCP administradas por AWS; se añadió `aws:RequestedRegion` al simulador.
   - [ ] 11.3 `t13-revocation.mjs`: T13 (≈15 min).
   - [x] 11.4 `t14-mfa-check.sh` y captura del login con TOTP: T14 / CA-11.2 (11/11).
-  - [~] 11.5 `perf-test.mjs` con 50 proyectos: RNF-HU-05. Primera corrida: p95 109 ms, pero 14/200 errores por exceder el throttling (≈100 rps contra 25 rps); el script se ajustó a 20 rps y se repite.
+  - [x] 11.5 `perf-test.mjs` con 50 proyectos: RNF-HU-05. Final a 10 rps: 200×200, p95 38 ms. Primera corrida: p95 109 ms, pero 14/200 errores por exceder el throttling (≈100 rps contra 25 rps); el script se ajustó a 20 rps y se repite.
   - [ ] 11.6 Capturas de CloudWatch (un caso exitoso y uno 401/403) y de CloudTrail: CA-NF07.2.
   - [ ] 11.7 Revisión manual a 375 px y con teclado: RNF-HU-06.
   - _Requisitos: DoD (b), (c)_ · _Evidencia: `evidence/`_
