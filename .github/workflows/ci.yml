@@ -75,6 +75,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - run: pip install cfn-lint==1.60.0
+      - run: pip install cfn-lint==1.60.0 aws-sam-translator==1.116.0 boto3
       - name: cfn-lint de la plantilla SAM
         run: cfn-lint infra/template.yaml
+      - name: Transformación SAM + invariantes de seguridad del API
+        run: python scripts/validate-sam.py
+        env:
+          AWS_DEFAULT_REGION: us-east-2

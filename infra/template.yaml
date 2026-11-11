@@ -262,10 +262,10 @@ Resources:
               # En access tokens de Cognito se compara contra el claim client_id (no hay aud).
               audience: [!Ref SpaClient]
       CorsConfiguration:
-        AllowOrigins: !If
-          - UseLocalhost
-          - [!Sub 'https://${Distribution.DomainName}', 'http://localhost:5173']
-          - [!Sub 'https://${Distribution.DomainName}']
+        # Sin !If sobre la lista completa: SAM no lo traduce bien a x-amazon-apigateway-cors.
+        AllowOrigins:
+          - !Sub 'https://${Distribution.DomainName}'
+          - !If [UseLocalhost, 'http://localhost:5173', !Ref AWS::NoValue]
         AllowHeaders: [authorization, content-type, idempotency-key]
         AllowMethods: [GET, POST, PATCH, OPTIONS]
         ExposeHeaders: [idempotent-replayed]
