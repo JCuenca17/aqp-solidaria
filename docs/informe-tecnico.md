@@ -173,7 +173,11 @@ Diseño responsive con Tailwind (sin Bootstrap), probado a 375 px. Criterios WCA
 - 3.3.1 y 4.1.3: errores con `role="alert"` y estados con `role="status"`.
 - 1.4.3: contraste de texto principal sobre fondo claro.
 
-> Pendiente: capturas a 375 px de catálogo, detalle con formulario de donación e historial; captura de las cabeceras de seguridad de CloudFront.
+> Pendiente: capturas a 375 px de catálogo, detalle con formulario de donación e historial.
+
+Las cabeceras de seguridad que entrega CloudFront se verificaron en el navegador (CA-NF11.2):
+
+![Figura: Cabeceras de respuesta de CloudFront: CSP restrictiva, HSTS, X-Content-Type-Options, Referrer-Policy y X-Frame-Options](../evidence/capturas/18-cabeceras-seguridad.png)
 
 ## 8. Observabilidad (RNF-HU-07)
 
@@ -181,7 +185,9 @@ Cada Lambda escribe una línea JSON por solicitud (`requestId`, acción, resulta
 
 ![Figura: Access logs del API en CloudWatch: solicitudes rechazadas por el PEP (401, «token not provided»), sin tokens ni datos personales](../evidence/capturas/14-cloudwatch-401.png)
 
-> Pendiente: captura de una solicitud exitosa (201) en CloudWatch y del evento CreateChangeSet en CloudTrail.
+![Figura: Access logs del API en CloudWatch: donaciones creadas con éxito (201), sin errores de autorización ni de integración](../evidence/capturas/16-cloudwatch-201-donacion.png)
+
+![Figura: CloudTrail registra la creación del conjunto de cambios del stack aqp-solidaria-academic (identificadores ocultos)](../evidence/capturas/17-cloudtrail-createchangeset.png)
 
 ## 9. Costos, cuenta y limpieza (RNF-HU-09)
 

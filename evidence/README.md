@@ -17,4 +17,4 @@ El reporte se conserva tal como se generó. El ID token de Cognito tiene firma, 
 ## Capturas (carpeta `capturas/`)
 
 Capturas de pantalla sanitizadas, sin IP, secretos TOTP ni tokens:
-CloudWatch 401 y 201 (CA-NF07.2), CloudTrail, login con TOTP (T14 / CA-11.2), demo a 375 px (RNF-HU-06), presupuesto de gasto cero (RNF-HU-09), equipo con MFA (CA-NF03.3), cabeceras de CloudFront (CA-NF11.2).
+CloudWatch 401 y 201 (CA-NF07.2), CloudTrail CreateChangeSet, login con TOTP (T14 / CA-11.2), demo a 375 px (RNF-HU-06), presupuesto de gasto cero (RNF-HU-09), equipo con MFA (CA-NF03.3), cabeceras de CloudFront (CA-NF11.2).
