@@ -1,0 +1,59 @@
+@import 'tailwindcss';
+
+/* Paleta inspirada en el sillar arequipeño: piedra clara, terracota y verde andino. */
+@theme {
+  --font-sans: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --color-sillar-50: #fbf8f3;
+  --color-sillar-100: #f4ede2;
+  --color-sillar-200: #e7dccb;
+  --color-ink: #1f1a16;
+  --color-ink-soft: #57493d;
+  --color-terra-600: #b4441f;
+  --color-terra-700: #9a3412;
+  --color-terra-800: #7c2d12;
+  --color-andino-600: #2f6b4f;
+  --color-andino-100: #e3f0e8;
+}
+
+@layer base {
+  html {
+    background: var(--color-sillar-50);
+    color: var(--color-ink);
+  }
+  /* RNF-HU-06: foco visible en todos los elementos interactivos. */
+  :focus-visible {
+    outline: 3px solid var(--color-terra-700);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+}
+
+@utility btn {
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60;
+}
+@utility btn-primary {
+  @apply btn bg-terra-700 text-white hover:bg-terra-800;
+}
+@utility btn-secondary {
+  @apply btn border border-sillar-200 bg-white text-ink hover:bg-sillar-100;
+}
+@utility card {
+  @apply rounded-2xl border border-sillar-200 bg-white p-5 shadow-sm;
+}
+@utility field-label {
+  @apply mb-1 block text-sm font-semibold text-ink;
+}
+@utility field-input {
+  @apply w-full rounded-lg border border-sillar-200 bg-white px-3 py-2 text-base text-ink placeholder:text-ink-soft/60 aria-invalid:border-terra-600;
+}
+@utility field-error {
+  @apply mt-1 text-sm font-medium text-terra-700;
+}
