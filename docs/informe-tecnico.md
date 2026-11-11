@@ -1,7 +1,7 @@
 # Informe técnico: Plataforma de Donaciones Seguras AQP-SOLIDARIA
 
 **Curso:** Tópicos Avanzados en Ingeniería de Software, EPIS, UNSA
-**Equipo:** Chancuaña Alvis Klismann · Cuenca Gutierrez Jose Luis · Hidalgo Chinchay Paulo Andre · Mamani Solórzano Efraín Alex · Soto Ccoya Gabriel Eduardo
+**Equipo:** Chancuaña Alvis Klismann · Cuenca Gutiérrez José Luis · Hidalgo Chinchay Paulo André · Mamani Solórzano Efraín Alex · Soto Ccoya Gabriel Eduardo
 **Periodo de trabajo:** 10/11/2026 – 13/11/2026
 **Repositorio:** https://github.com/JCuenca17/aqp-solidaria · **Demo:** https://d1mkuf1y3fbox2.cloudfront.net
 
@@ -27,9 +27,9 @@ Se trabajó con **desarrollo dirigido por especificación** (SDD): `requirements
 
 | Integrante | Rol | Responsabilidad principal |
 |---|---|---|
-| Cuenca Gutierrez Jose Luis | Líder técnico y DevOps | Cuenta AWS Free plan, plantilla SAM, CI, despliegue desde CloudShell |
+| Cuenca Gutiérrez José Luis | Líder técnico y DevOps | Cuenta AWS Free plan, plantilla SAM, CI, despliegue desde CloudShell |
 | Chancuaña Alvis Klismann | Identidad y seguridad | Cognito (PKCE, grupos, MFA TOTP), módulo `authz`, threat model y mapeo NIST |
-| Hidalgo Chinchay Paulo Andre | Backend | Donaciones, idempotencia y transacciones en DynamoDB |
+| Hidalgo Chinchay Paulo André | Backend | Donaciones, idempotencia y transacciones en DynamoDB |
 | Mamani Solórzano Efraín Alex | Frontend | SPA React, login OIDC, accesibilidad |
 | Soto Ccoya Gabriel Eduardo | QA y documentación | Pruebas T01–T14, evidencias e informe |
 

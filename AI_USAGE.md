@@ -5,10 +5,10 @@
 | Campo | Contenido |
 |---|---|
 | **Herramienta/modelo** | Claude Code (CLI de Anthropic), modelo Claude Opus 5.5 (`claude-opus-5-5`). |
-| **Participantes** | Operó la herramienta: Cuenca Gutierrez Jose Luis. Revisión de PR a partir de la protección de `main` (11/11): cualquier otro integrante (Chancuaña Alvis Klismann, Hidalgo Chinchay Paulo Andre, Mamani Solórzano Efraín Alex, Soto Ccoya Gabriel Eduardo). |
+| **Participantes** | Operó la herramienta: Cuenca Gutiérrez José Luis. Revisión de PR a partir de la protección de `main` (11/11): cualquier otro integrante (Chancuaña Alvis Klismann, Hidalgo Chinchay Paulo André, Mamani Solórzano Efraín Alex, Soto Ccoya Gabriel Eduardo). |
 | **Tareas asistidas** | Planificación a partir de `requirements.md` y `design.md` (día 1–2); scaffolding del repositorio; backend (`authz`, `projects`, `donations`, `audit`, handlers) para HU-01 a HU-11; plantilla SAM; SPA React; pruebas unitarias; scripts de prueba T01–T14 y de rendimiento; OpenAPI, threat model, README y borrador del informe. |
 | **Aportes IA** | Código, plantilla SAM, scripts y documentos del repositorio (historial de commits del 11/11 en `main`; desde la protección de `main`, por PR). Detalle por módulo en la tabla de abajo. |
-| **Validación humana** | Jose Luis Cuenca desplegó en AWS y ejecutó T01–T14 y RNF-HU-05 desde CloudShell (`evidence/`). La ejecución real reveló cinco problemas que el asistente no había detectado y que se corrigieron: `Authorizer: NONE` sin `DefaultAuthorizer` (SAM), CORS no aplicado por un `!If` en `AllowOrigins`, T11 con 403 en lugar de 401, T10 sin contexto de región ante las SCP de AWS, y 429 en la prueba de rendimiento por el throttling. |
+| **Validación humana** | José Luis Cuenca desplegó en AWS y ejecutó T01–T14 y RNF-HU-05 desde CloudShell (`evidence/`). La ejecución real reveló cinco problemas que el asistente no había detectado y que se corrigieron: `Authorizer: NONE` sin `DefaultAuthorizer` (SAM), CORS no aplicado por un `!If` en `AllowOrigins`, T11 con 403 en lugar de 401, T10 sin contexto de región ante las SCP de AWS, y 429 en la prueba de rendimiento por el throttling. |
 | **Limitaciones** | Ver la sección de abajo. |
 
 ## Detalle por artefacto
