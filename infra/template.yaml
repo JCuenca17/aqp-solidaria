@@ -251,6 +251,9 @@ Resources:
     Properties:
       StageName: !Ref Stage
       Auth:
+        # Por defecto TODA ruta exige JWT (deny by default, Zero Trust); las públicas
+        # declaran explícitamente Authorizer: NONE.
+        DefaultAuthorizer: CognitoJwt
         Authorizers:
           CognitoJwt:
             IdentitySource: $request.header.Authorization
