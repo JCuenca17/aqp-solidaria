@@ -4,7 +4,7 @@ Prototipo académico del curso **Tópicos Avanzados en Ingeniería de Software**
 
 > **Simulación académica.** No se solicitan, almacenan ni procesan datos de pago. Usuarios, proyectos y la Fundación AQP-SOLIDARIA son ficticios.
 
-- Especificación: [`requirements.md`](requirements.md) · Diseño: [`design.md`](design.md)
+- Especificación: [`requirements.md`](requirements.md) · Diseño: [`design.md`](design.md) · Plan de implementación: [`tasks.md`](tasks.md)
 - Contrato del API: [`docs/api.yaml`](docs/api.yaml) (OpenAPI 3.1)
 - Modelo de amenazas y mapeo NIST: [`docs/threat-model.md`](docs/threat-model.md)
 - Guía de cuenta AWS y despliegue: [`docs/guia-cuenta-aws.md`](docs/guia-cuenta-aws.md)

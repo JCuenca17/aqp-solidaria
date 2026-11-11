@@ -15,7 +15,7 @@ Las donaciones son **simuladas**: el sistema no pide ni guarda tarjetas, CVV, cu
 
 ## 2. Metodología
 
-Se trabajó con **desarrollo dirigido por especificación**: los documentos `requirements.md` (qué) y `design.md` (cómo) son la fuente de verdad. Cada historia y criterio (HU-xx, CA-xx.x, RNF-HU-xx) se rastrea hasta el código, una prueba automática y una prueba de aceptación (T01–T14). Las pruebas unitarias llevan el identificador del criterio en su nombre.
+Se trabajó con **desarrollo dirigido por especificación** (SDD): `requirements.md` (qué) y `design.md` (cómo) son la fuente de verdad, y `tasks.md` (en qué orden y cómo se verifica) es el plan de implementación. Ese plan se formalizó por escrito el 11/11, con el código del MVP ya en marcha; desde ese momento el despliegue y las pruebas se ejecutaron tarea por tarea siguiéndolo. Cada historia y criterio (HU-xx, CA-xx.x, RNF-HU-xx) se rastrea hasta el código, una prueba automática y una prueba de aceptación (T01–T14). Las pruebas unitarias llevan el identificador del criterio en su nombre.
 
 | Fecha | Trabajo | Resultado verificable |
 |---|---|---|
