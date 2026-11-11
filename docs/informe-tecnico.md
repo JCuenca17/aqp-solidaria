@@ -117,7 +117,7 @@ Resultado de T08 contra AWS (11/11): 200×1, 409×9 y un único incremento de S/
 | T10 | Lambda de listado intenta escribir | AccessDenied | Put/Update/Delete: implicitDeny; Get/Query: allowed (control) | `evidence/t10-iam-simulator.md` |
 | T11 | ID token / token alterado | 401 (ID token: 403, ver §4.4) | ID token 403, alterado 401, basura 401 | `evidence/security-tests-*.md` |
 | T12 | Gestor consulta historial ajeno | 403/404 | /me 403, por id 403 | ídem |
-| T13 | Token revocado antes de expirar | Aceptado hasta expirar | [ ] | `evidence/t13-revocation.md` |
+| T13 | Token revocado antes de expirar | Aceptado hasta expirar | 200 en 12 consultas tras «Salir» (20:32–20:43 UTC); 401 a las 20:44:44, 7 s después de expirar | `evidence/t13-revocation.md` |
 | T14 | GESTOR sin segundo factor | Sin tokens | Reto SOFTWARE_TOKEN_MFA, sin tokens; login web pide TOTP | `evidence/t14-mfa.md` + captura |
 
 ### 6.3 Rendimiento (RNF-HU-05)

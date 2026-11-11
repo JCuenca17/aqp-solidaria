@@ -122,10 +122,10 @@ Tercer documento del ciclo de desarrollo dirigido por especificación (SDD): `re
 - [ ] **11. Pruebas de aceptación con evidencia**
   - [x] 11.1 `security-tests.mjs`: T01–T09, T11, T12 (11/11). 10/11 a la primera; T11 dio 403 para el ID token (insufficient_scope). Se acepta 401/403 solo para el ID token y se documenta en el informe §4.4.
   - [x] 11.2 `t10-iam-check.sh`: T10 (11/11). Escrituras implicitDeny, lecturas allowed. El primer intento sin contexto de región dio explicitDeny en todo por las SCP administradas por AWS; se añadió `aws:RequestedRegion` al simulador.
-  - [ ] 11.3 `t13-revocation.mjs`: T13 (≈15 min).
+  - [x] 11.3 `t13-revocation.mjs`: T13 (11/11). Token de 15 min aceptado tras revocar el refresh token hasta su expiración; 401 después.
   - [x] 11.4 `t14-mfa-check.sh` y captura del login con TOTP: T14 / CA-11.2 (11/11).
   - [x] 11.5 `perf-test.mjs` con 50 proyectos: RNF-HU-05. Final a 10 rps: 200×200, p95 38 ms. Primera corrida: p95 109 ms, pero 14/200 errores por exceder el throttling (≈100 rps contra 25 rps); el script se ajustó a 20 rps y se repite.
-  - [ ] 11.6 Capturas de CloudWatch (un caso exitoso y uno 401/403) y de CloudTrail: CA-NF07.2.
+  - [~] 11.6 Capturas de CloudWatch (un caso exitoso y uno 401/403) y de CloudTrail: CA-NF07.2. Captura del 401 (`missing: token not provided`) tomada; faltan la de 201 y la de CloudTrail.
   - [ ] 11.7 Revisión manual a 375 px y con teclado: RNF-HU-06.
   - _Requisitos: DoD (b), (c)_ · _Evidencia: `evidence/`_
 
