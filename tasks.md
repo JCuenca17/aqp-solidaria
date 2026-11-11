@@ -101,7 +101,7 @@ Tercer documento del ciclo de desarrollo dirigido por especificación (SDD): `re
   - [x] 8.2 MFA en el AWS Builder ID del dueño (la cuenta nueva no tiene usuario root): settings.aws.com → *Manage security and sign-in*. Hecho el 11/11: TOTP registrado y correo de recuperación añadido.
   - [x] 8.3 Región: asignada por AWS según el país (Perú → `us-east-2`, Ohio); plantilla y scripts ajustados.
   - [x] 8.4 Presupuesto de gasto cero `aqp-solidaria-gasto-cero` en AWS Budgets, con alertas a los 5 integrantes (captura).
-  - [ ] 8.5 Invitar a cada integrante como miembro del equipo (Builder ID propio con MFA); sin usuarios IAM de consola ni llaves (captura).
+  - [~] 8.5 Invitar a cada integrante como miembro del equipo (Builder ID propio con MFA); sin usuarios IAM de consola ni llaves (captura). Invitaciones enviadas el 11/11 a los 4 integrantes; falta que acepten.
   - _Nota: la nueva experiencia de AWS no permite usuario root ni usuarios IAM con consola; se documenta como desviación en el informe §9._
   - _Requisitos: RNF-HU-03 (CA-NF03.3), RNF-HU-09 (CA-NF09.1)_ · _Guía: `docs/guia-cuenta-aws.md`_
 
