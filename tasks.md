@@ -112,7 +112,7 @@ Tercer documento del ciclo de desarrollo dirigido por especificación (SDD): `re
 
 - [ ] **10. Despliegue en el stage `academic`**
   - [x] 10.1 `bash scripts/deploy.sh` desde CloudShell (11/11). WebUrl: https://d1mkuf1y3fbox2.cloudfront.net · ApiUrl: https://a1eensowg8.execute-api.us-east-2.amazonaws.com/academic. Primer intento falló por `Authorizer: NONE` sin `DefaultAuthorizer`; corregido en el commit 755f72f.
-  - [ ] 10.2 `create-users.sh` y `enroll-totp.sh` para GESTOR y AUDITOR.
+  - [x] 10.2 `create-users.sh` y `enroll-totp.sh` para GESTOR y AUDITOR (11/11). Login de GESTOR con TOTP verificado en la demo. Segundo despliegue: CORS corregido (commit e6399bc).
   - [ ] 10.3 Crear y publicar proyectos de prueba (`seed-projects.mjs` para 50).
   - [x] 10.4 Cabeceras de CloudFront verificadas (CSP, HSTS, nosniff, Referrer-Policy, X-Frame-Options) y redirección HTTP→HTTPS 301 (11/11). Falta captura de DevTools para el informe.
   - _Requisitos: CA-NF01.1, CA-NF11.2, CA-NF08.2_
