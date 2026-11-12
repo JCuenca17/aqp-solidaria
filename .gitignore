@@ -19,3 +19,7 @@ Thumbs.db
 .vscode/
 .idea/
 .vitest/
+
+# Documentos de entrega generados (se suben a DUTIC, no al repo)
+*.docx
+*.pdf
