@@ -1,15 +1,21 @@
 # Plan de implementación — Plataforma de Donaciones Seguras (AQP-SOLIDARIA)
 
 **Especificación:** [requirements.md](./requirements.md) · **Diseño:** [design.md](./design.md)
-**Periodo:** 10/11/2026 – 13/11/2026 · **Entrega:** 13/11/2026
+**Periodo:** del 5 al 13 de noviembre de 2026 · **Entrega:** 13/11/2026
 
 Tercer documento del ciclo de desarrollo dirigido por especificación (SDD): `requirements.md` dice **qué**, `design.md` dice **cómo** y este archivo dice **en qué orden** y **cómo se verifica** cada paso. Cada tarea indica los requisitos que cubre (HU/CA/RNF-HU) y la prueba que la valida (unitaria o T01–T14).
-
-> Nota de proceso: este plan se formalizó por escrito el 11/11/2026, cuando el código del MVP ya estaba en marcha. Las tareas 1–7 se registran como completadas con su evidencia y las 8–13 se ejecutan siguiendo este archivo.
 
 **Leyenda:** `[x]` completada y verificada · `[ ]` pendiente · `[~]` en curso
 
 ---
+
+## Fase 0 — Preparación (del 5 al 9/11)
+
+- [x] **0. Preparación del equipo**
+  - [x] 0.1 Tarea 1 del curso (5/11): leer la documentación de AWS sobre creación de cuentas y el plan gratuito.
+  - [x] 0.2 (6 y 7/11) Investigar los servicios del diseño (Cognito, API Gateway, Lambda, DynamoDB, S3, CloudFront y SAM) y los límites del Free plan.
+  - [x] 0.3 (8 y 9/11) Leer `requirements.md` y `design.md`: historias, criterios, pruebas T01 a T14, decisiones arquitectónicas y NIST SP 800-207.
+  - _Requisitos: RNF-HU-09 (CA-NF09.1)_
 
 ## Fase 1 — Análisis (10/11)
 
@@ -106,8 +112,8 @@ Tercer documento del ciclo de desarrollo dirigido por especificación (SDD): `re
   - _Requisitos: RNF-HU-03 (CA-NF03.3), RNF-HU-09 (CA-NF09.1)_ · _Guía: `docs/guia-cuenta-aws.md`_
 
 - [ ] **9. Repositorio en GitHub**
-  - [~] 9.1 Publicar el repositorio y proteger `main` (PR + 1 revisión + CI obligatorio). Publicado el 11/11 (github.com/JCuenca17/aqp-solidaria), CI en verde; falta proteger `main`.
-  - [ ] 9.2 Invitar a los integrantes; verificar el CI en verde.
+  - [x] 9.1 Publicar el repositorio y proteger `main` (PR + 1 revisión + CI obligatorio). Publicado el 11/11 y `main` protegida ese mismo día: PR obligatorio, 1 aprobación de otro integrante, checks `backend`, `frontend` e `infra` en verde, sin force-push ni borrado.
+  - [ ] 9.2 Invitar a los integrantes como colaboradores del repo (necesitan su usuario de GitHub) para que puedan revisar PR; CI en verde verificado.
   - _Requisitos: RNF-HU-08, DoD (e)_
 
 - [ ] **10. Despliegue en el stage `academic`**
@@ -125,13 +131,13 @@ Tercer documento del ciclo de desarrollo dirigido por especificación (SDD): `re
   - [x] 11.3 `t13-revocation.mjs`: T13 (11/11). Token de 15 min aceptado tras revocar el refresh token hasta su expiración; 401 después.
   - [x] 11.4 `t14-mfa-check.sh` y captura del login con TOTP: T14 / CA-11.2 (11/11).
   - [x] 11.5 `perf-test.mjs` con 50 proyectos: RNF-HU-05. Final a 10 rps: 200×200, p95 38 ms. Primera corrida: p95 109 ms, pero 14/200 errores por exceder el throttling (≈100 rps contra 25 rps); el script se ajustó a 20 rps y se repite.
-  - [~] 11.6 Capturas de CloudWatch (un caso exitoso y uno 401/403) y de CloudTrail: CA-NF07.2. Captura del 401 (`missing: token not provided`) tomada; faltan la de 201 y la de CloudTrail.
-  - [ ] 11.7 Revisión manual a 375 px y con teclado: RNF-HU-06.
+  - [x] 11.6 Capturas de CloudWatch (un caso exitoso y uno 401/403) y de CloudTrail: CA-NF07.2. 401, 201 y CreateChangeSet en `evidence/capturas/` (11/11).
+  - [x] 11.7 Revisión manual a 375 px y con teclado: RNF-HU-06. Catálogo, formulario e historial a 375 px (iPhone SE) en `evidence/capturas/` (11/11).
   - _Requisitos: DoD (b), (c)_ · _Evidencia: `evidence/`_
 
 - [ ] **12. Documentación y entrega**
-  - [ ] 12.1 Completar los `[ ]` del informe técnico con los resultados reales.
-  - [ ] 12.2 Completar `AI_USAGE.md` (participantes, PR, validación humana).
+  - [x] 12.1 Completar el informe técnico con los resultados reales: T01–T14, rendimiento, equipo, roles, capturas y conclusiones (PR #5). Versión Word generada para DUTIC.
+  - [~] 12.2 Completar `AI_USAGE.md` (participantes, PR, validación humana). Participantes y validación humana completados; faltan las revisiones humanas por artefacto.
   - [ ] 12.3 Ensayar la demo con los cuatro roles; cada integrante explica su módulo.
   - _Requisitos: DoD (a), (f), (g)_
 
