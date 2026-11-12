@@ -18,3 +18,4 @@ credentials*
 Thumbs.db
 .vscode/
 .idea/
+.vitest/
