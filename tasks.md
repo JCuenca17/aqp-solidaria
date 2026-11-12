@@ -13,8 +13,8 @@ Tercer documento del ciclo de desarrollo dirigido por especificación (SDD): `re
 
 - [x] **0. Preparación del equipo**
   - [x] 0.1 Tarea 1 del curso (5/11): leer la documentación de AWS sobre creación de cuentas y el plan gratuito.
-  - [x] 0.2 Investigar los servicios del diseño (Cognito, API Gateway, Lambda, DynamoDB, S3, CloudFront y SAM) y los límites del Free plan.
-  - [x] 0.3 Leer `requirements.md` y `design.md`: historias, criterios, pruebas T01 a T14, decisiones arquitectónicas y NIST SP 800-207.
+  - [x] 0.2 (6 y 7/11) Investigar los servicios del diseño (Cognito, API Gateway, Lambda, DynamoDB, S3, CloudFront y SAM) y los límites del Free plan.
+  - [x] 0.3 (8 y 9/11) Leer `requirements.md` y `design.md`: historias, criterios, pruebas T01 a T14, decisiones arquitectónicas y NIST SP 800-207.
   - _Requisitos: RNF-HU-09 (CA-NF09.1)_
 
 ## Fase 1 — Análisis (10/11)
