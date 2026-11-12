@@ -1,13 +1,21 @@
 # Plan de implementación — Plataforma de Donaciones Seguras (AQP-SOLIDARIA)
 
 **Especificación:** [requirements.md](./requirements.md) · **Diseño:** [design.md](./design.md)
-**Periodo:** 10/11/2026 – 13/11/2026 · **Entrega:** 13/11/2026
+**Periodo:** del 5 al 13 de noviembre de 2026 · **Entrega:** 13/11/2026
 
 Tercer documento del ciclo de desarrollo dirigido por especificación (SDD): `requirements.md` dice **qué**, `design.md` dice **cómo** y este archivo dice **en qué orden** y **cómo se verifica** cada paso. Cada tarea indica los requisitos que cubre (HU/CA/RNF-HU) y la prueba que la valida (unitaria o T01–T14).
 
 **Leyenda:** `[x]` completada y verificada · `[ ]` pendiente · `[~]` en curso
 
 ---
+
+## Fase 0 — Preparación (del 5 al 9/11)
+
+- [x] **0. Preparación del equipo**
+  - [x] 0.1 Tarea 1 del curso (5/11): leer la documentación de AWS sobre creación de cuentas y el plan gratuito.
+  - [x] 0.2 Investigar los servicios del diseño (Cognito, API Gateway, Lambda, DynamoDB, S3, CloudFront y SAM) y los límites del Free plan.
+  - [x] 0.3 Leer `requirements.md` y `design.md`: historias, criterios, pruebas T01 a T14, decisiones arquitectónicas y NIST SP 800-207.
+  - _Requisitos: RNF-HU-09 (CA-NF09.1)_
 
 ## Fase 1 — Análisis (10/11)
 
