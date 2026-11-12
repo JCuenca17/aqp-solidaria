@@ -18,8 +18,8 @@ El equipo trabajó con desarrollo dirigido por especificación (SDD). `requireme
 | Fecha | Trabajo | Resultado verificable |
 |---|---|---|
 | 5/11 | Asignación del laboratorio. Tarea 1 del curso: lectura de la documentación de AWS sobre creación de cuentas y el plan gratuito | Requisitos de la cuenta y del Free plan identificados |
-| Del 6 al 9/11 | Investigación de los servicios de AWS que pide el diseño (Cognito, API Gateway, Lambda, DynamoDB, S3, CloudFront y SAM) y de los límites del Free plan | Servicios y restricciones de la cuenta conocidos antes del laboratorio |
-| Del 6 al 9/11 | Lectura de `requirements.md` y `design.md`: historias, criterios, pruebas T01 a T14, decisiones arquitectónicas y NIST SP 800-207 | Alcance del MVP y de las extensiones entendido por el equipo |
+| 6 y 7/11 | Investigación de los servicios de AWS que pide el diseño (Cognito, API Gateway, Lambda, DynamoDB, S3, CloudFront y SAM) y de los límites del Free plan | Servicios y restricciones de la cuenta conocidos antes del laboratorio |
+| 8 y 9/11 | Lectura de `requirements.md` y `design.md`: historias, criterios, pruebas T01 a T14, decisiones arquitectónicas y NIST SP 800-207 | Alcance del MVP y de las extensiones entendido por el equipo |
 | 10/11 | Laboratorio: reparto de roles, análisis de la especificación en equipo y threat model | Roles asignados y modelo de amenazas |
 | 11/11 | Repositorio, backend, plantilla SAM, SPA, pruebas unitarias, CI | 77 pruebas en verde, `cfn-lint` sin errores |
 | 11/11 | Cuenta Free plan (nueva experiencia de AWS), MFA, presupuesto, equipo, despliegue, usuarios de prueba y TOTP | WebUrl activa, capturas en `evidence/capturas/` |
